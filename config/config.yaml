@@ -8,7 +8,7 @@ defaults:
   - logger: default
   - data: default
   - preprocessing: default
-  - model: transformer
+  - model: vanilla_transformer
   - postprocessing: default
   - criterion: bce
   - criterion_reduction: masked_mean

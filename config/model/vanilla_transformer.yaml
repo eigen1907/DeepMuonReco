@@ -1,5 +1,5 @@
 module:
-  _target_: deepmuonreco.nn.InnerTrackSelectionTransformer
+  _target_: deepmuonreco.nn.VanillaTransformerModel
   dim_model: 64 # Dimension of the model embeddings
   dim_feedforward: 128 # Dimension of the feed-forward network
   activation: gelu # Activation function (e.g., 'gelu', 'relu')
