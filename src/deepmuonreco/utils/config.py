@@ -73,7 +73,7 @@ def build_tensordictsequential(
         try:
             modules[name] = build_tensordictmodule(each)
         except Exception as error:
-            raise ValueError(f"Error building module {name}: {error}")
+            raise ValueError(f"Error building module {name}: {error}") from error
 
     selected_out_keys = config.get('selected_out_keys', None)
     if selected_out_keys is not None:
