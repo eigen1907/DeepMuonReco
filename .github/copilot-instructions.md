@@ -20,9 +20,8 @@ Always reference these instructions first and fallback to search or bash command
   ```bash
   source /usr/share/miniconda/etc/profile.d/conda.sh
   conda activate deepmuonreco-py312
-  export PROJECT_PREFIX=$(pwd)
   export PROJECT_ROOT=$(pwd)  # CRITICAL: Required for Hydra config resolution
-  export PYTHONPATH=${PROJECT_PREFIX}/src:${PYTHONPATH}
+  export PYTHONPATH=${PROJECT_ROOT}/src:${PYTHONPATH}
   ```
 - **Fish**: `source setup.fish`
 
