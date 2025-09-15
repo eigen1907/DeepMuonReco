@@ -114,7 +114,7 @@ After making changes, ALWAYS validate by running these specific scenarios:
 ### Environment Issues
 - **"micromamba: command not found"**: Use conda instead of micromamba
 - **SSL certificate errors with micromamba**: Switch to conda for environment creation
-- **"Environment variable 'PROJECT_ROOT' not found"**: Set `export PROJECT_ROOT=$(pwd)` before running
+- **"PROJECT_ROOT not set"**: Ensure PROJECT_ROOT is exported with `export PROJECT_ROOT=$(pwd)` before running
 
 ### Training Issues  
 - **CUDA not available warnings**: Expected when running on CPU, safe to ignore
