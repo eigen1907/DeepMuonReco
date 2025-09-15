@@ -5,8 +5,13 @@ fit:
 
 data:
   train_set:
-    max_events: ${eval:'2 * ${data.batch_size}'}
+    path: ${paths.root_dir}/data/sanity-check.root
+    max_events: ${data.batch_size}
+
   val_set:
-    max_events: ${eval:'2 * ${data.eval_batch_size}'}
+    path: ${paths.root_dir}/data/sanity-check.root
+    max_events: ${data.eval_batch_size}
+
   test_set:
-    max_events: ${eval:'2 * ${data.eval_batch_size}'}
+    path: ${paths.root_dir}/data/sanity-check.root
+    max_events: ${data.eval_batch_size}
