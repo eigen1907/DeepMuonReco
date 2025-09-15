@@ -120,17 +120,18 @@ hydra:
     hydra:
     - hydra.mode=RUN
     task:
+    - model.module.dim_model=32
+    - model.module.num_layers=2
+    - fit.num_epochs=1
+    - data.train_set.max_events=50
+    - device=cpu
     - data.train_set.path=data/sanity-check.root
     - data.val_set.path=data/sanity-check.root
     - data.test_set.path=data/sanity-check.root
-    - data.train_set.max_events=100
-    - data.val_set.max_events=50
-    - fit.num_epochs=1
-    - device=cpu
   job:
     name: train
     chdir: null
-    override_dirname: data.test_set.path=data/sanity-check.root,data.train_set.max_events=100,data.train_set.path=data/sanity-check.root,data.val_set.max_events=50,data.val_set.path=data/sanity-check.root,device=cpu,fit.num_epochs=1
+    override_dirname: data.test_set.path=data/sanity-check.root,data.train_set.max_events=50,data.train_set.path=data/sanity-check.root,data.val_set.path=data/sanity-check.root,device=cpu,fit.num_epochs=1,model.module.dim_model=32,model.module.num_layers=2
     id: ???
     num: ???
     config_name: config
@@ -158,7 +159,7 @@ hydra:
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /home/runner/work/DeepMuonReco/DeepMuonReco/logs/test/25-09-15-07-08-40_nonchalant-grasshopper
+    output_dir: /home/runner/work/DeepMuonReco/DeepMuonReco/logs/test/25-09-15-07-14-07_quixotic-crocodile
     choices:
       debug: null
       hydra: default
