@@ -1,8 +1,0 @@
-- model.module.dim_model=32
-- model.module.num_layers=2
-- fit.num_epochs=1
-- data.train_set.max_events=50
-- device=cpu
-- data.train_set.path=data/sanity-check.root
-- data.val_set.path=data/sanity-check.root
-- data.test_set.path=data/sanity-check.root
