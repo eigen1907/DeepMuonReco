@@ -2,7 +2,7 @@ import torch.nn as nn
 from torch.nn import Parameter
 
 
-# FIXME: reanme
+# FIXME: rename
 def group_parameters(
     model: nn.Module,
     weight_decay: float,
