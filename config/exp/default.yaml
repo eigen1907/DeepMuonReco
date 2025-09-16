@@ -1,2 +1,7 @@
 name: test # experiment name
 pos_weight: 30.0
+
+track_dim: 3
+segment_dim: 6
+hit_dim: 3
+target_dim: 1

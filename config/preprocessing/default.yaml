@@ -19,7 +19,6 @@ modules:
     out_keys:
       - segment_prep
 
-
   - name: rechit_norm
     module:
       _target_: deepmuonreco.nn.Normalize
