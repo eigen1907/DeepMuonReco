@@ -1,0 +1,9 @@
+t0: 10 # epochs, https://arxiv.org/pdf/1608.03983
+t_mult: 2
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.CosineAnnealingWarmRestarts
+  _partial_: true
+  T_mult: ${lr_scheduler.t_mult}
+interval: step
+frequency: 1

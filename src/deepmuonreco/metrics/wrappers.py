@@ -4,11 +4,13 @@ from tensordict.utils import _unravel_key_to_tuple
 from tensordict import TensorDict
 from torchmetrics.wrappers.abstract import WrapperMetric
 from torchmetrics.metric import Metric
+from aim import Image
 
 
 __all__ = [
     'TensorDictWrapper',
     'MaskingWrapper',
+    'PlotWrapper',
 ]
 
 
@@ -93,3 +95,25 @@ class MaskingWrapper(WrapperMetric):
 
     def reset(self) -> None:
         self.metric.reset()
+
+
+class PlotWrapper(WrapperMetric):
+    """
+    """
+
+    def __init__(self, metric: Metric) -> None:
+        super().__init__()
+        if not isinstance(metric, Metric):
+            raise ValueError(f"Expected argument `metric` to be an instance of `torchmetrics.Metric` but got {metric}")
+        self.metric = metric
+
+    def forward(self, *args, **kwargs) -> Any:
+        self.metric.update(*args, **kwargs)
+        return self.compute()
+
+    def update(self, *args, **kwargs) -> None:
+        return self.metric.update(*args, **kwargs)
+
+    def compute(self) -> Any:
+        fig, _ = self.metric.plot()
+        return Image(fig)

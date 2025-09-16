@@ -1,0 +1,8 @@
+# @package _global_
+run_name: ${now:%y-%m-%d-%H-%M-%S}_${slug:2}
+num_threads: 1
+seed: null
+tags: []
+description: ""
+pre_fit_validation: true
+predict: false

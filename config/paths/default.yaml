@@ -1,4 +1,6 @@
 root_dir: ${oc.env:PROJECT_ROOT}
 log_dir: ${paths.root_dir}/logs/
-run_dir: ${paths.log_dir}/${exp.name}/${run}
+run_dir: ${paths.log_dir}/${exp.name}/${run_name}
 work_dir: ${hydra:runtime.cwd}
+
+data_dir: /users/seyang/data/deepmuonreco/

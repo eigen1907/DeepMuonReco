@@ -1,17 +1,12 @@
 # @package _global_
 
-fit:
-  num_epochs: 2
+defaults:
+  - default
 
 data:
-  train_set:
-    path: ${paths.root_dir}/data/sanity-check.root
-    max_events: ${data.batch_size}
-
-  val_set:
-    path: ${paths.root_dir}/data/sanity-check.root
-    max_events: ${data.eval_batch_size}
-
-  test_set:
-    path: ${paths.root_dir}/data/sanity-check.root
-    max_events: ${data.eval_batch_size}
+  root: ${paths.root_dir}/data
+  train_file: sanity-check.root
+  val_file: sanity-check.root
+  test_file: sanity-check.root
+  predict_file: sanity-check.root
+  batch_size: 32
