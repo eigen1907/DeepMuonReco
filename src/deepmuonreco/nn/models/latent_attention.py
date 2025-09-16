@@ -135,25 +135,25 @@ class LatentAttentionModel(nn.Module):
         )
 
         # NOTE: muonn detector measurement encoding
-        muon_det_latent = self.muon_det_encoder.forward(
+        muon_det_latent = self.muon_det_encoder(
             input=muon_det_embed,
             data_mask=muon_det_data_mask,
         )
 
         # NOTE: tracker track encoding
-        track_latent = self.track_encoder.forward(
+        track_latent = self.track_encoder(
             input=track_embed,
             data_mask=track_data_mask,
         )
 
-        latent = self.encoder.forward(
+        latent = self.encoder(
             target=track_latent,
             source=muon_det_latent,
             target_data_mask=None,
             source_data_mask=None,
         )
 
-        track_embed = self.decoder.forward(
+        track_embed = self.decoder(
             target=track_embed,
             source=latent,
             target_data_mask=track_data_mask,
