@@ -2,9 +2,9 @@ import torch
 from torch import nn
 from torch import Tensor
 import einops as eo
-from .transformer import CrossAttentionBlock
+from torch.nn.modules.transformer import _get_clones
+from .transformer import CrossAttentionBlock, TransformerEncoderLayer
 from .transformer import MLPBlock
-from .transformer import TransformerEncoder
 
 
 __all__ = [
@@ -95,7 +95,7 @@ class PerceiverEncoder(nn.Module):
         return output
 
 
-class PerceiverProcessor(TransformerEncoder):
+class PerceiverProcessor(TransformerEncoderLayer):
 
 
     def forward( # type: ignore[override]
@@ -104,12 +104,11 @@ class PerceiverProcessor(TransformerEncoder):
     ) -> Tensor:
         """
         """
-        return super().forward(input=latent, data_mask=None)
+        return super().forward(input=latent, attn_mask=None)
 
 
 class PerceiverBasicDecoder(nn.Module):
     """Cross-attention-based decoder."""
-
 
     def __init__(
         self,
@@ -170,7 +169,6 @@ class PerceiverBasicDecoder(nn.Module):
             output.masked_fill_(mask=pad_mask, value=0)
 
         return output
-
 
 
 class PerceiverLatentQueryDecoder(PerceiverEncoder):
