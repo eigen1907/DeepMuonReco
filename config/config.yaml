@@ -20,11 +20,12 @@ defaults:
   - optimizer: adamw
   - lr_scheduler: plateau
 
-  - trainer: gpu
+  - trainer: gpu_16-mixed
   - callbacks: default
   - logger: aim
 
   - misc: default
 
+  - torch: default
   - hydra: default
   - debug: null

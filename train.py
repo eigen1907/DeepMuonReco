@@ -47,8 +47,9 @@ def main(config: DictConfig):
     with open(output_dir / 'config.yaml', 'w') as stream:
         OmegaConf.save(config=config, f=stream)
 
-    torch.set_num_threads(config.num_threads)
-    torch.set_float32_matmul_precision(precision=config.float32_matmul_precision)
+    torch.set_num_threads(config.torch.num_threads)
+    torch.set_num_interop_threads(config.torch.num_interop_threads)
+    torch.set_float32_matmul_precision(precision=config.torch.float32_matmul_precision)
 
     if config.seed:
         seed_everything(config.seed, workers=True)

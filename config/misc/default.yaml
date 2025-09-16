@@ -7,5 +7,3 @@ pre_fit_validation: true
 predict: false
 
 seed: null
-num_threads: 1
-float32_matmul_precision: high
