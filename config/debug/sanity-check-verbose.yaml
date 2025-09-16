@@ -1,0 +1,19 @@
+# @package _global_
+
+defaults:
+  - default
+
+exp:
+  name: sanity-check
+
+hydra:
+  job_logging:
+    root:
+      level: INFO
+data:
+  module:
+    train_examples: 4096
+    val_examples: 4096
+    test_examples: 4096
+    num_workers: 0
+    pin_memory: false

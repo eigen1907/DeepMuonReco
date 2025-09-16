@@ -1,0 +1,2 @@
+cuda_memory_summary:
+  _target_: deepmuonreco.callbacks.CUDAMemorySummary

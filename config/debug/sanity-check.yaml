@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - default
+
+data:
+  root: ${paths.root_dir}/data
+  train_file: sanity-check.h5
+  val_file: sanity-check.h5
+  test_file: sanity-check.h5
+  predict_file: sanity-check.h5
+  batch_size: 32

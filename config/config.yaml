@@ -5,21 +5,26 @@ defaults:
 
   - exp: default
   - paths: default
-  - logger: default
   - data: default
+
+  - augmentation: none
   - preprocessing: default
-  - model: transformer
+  - model: vanilla_transformer
   - postprocessing: default
+
+  - metric: default
+
   - criterion: bce
   - criterion_reduction: masked_mean
+
   - optimizer: adamw
-  - fit: default
-  - metric: default
+  - lr_scheduler: plateau
+
+  - trainer: gpu
+  - callbacks: default
+  - logger: aim
+
+  - misc: default
+
   - hydra: default
   - debug: null
-
-seed: 1337
-device: cuda:0
-num_threads: 1
-num_interop_threads: 1
-run: ${now:%y-%m-%d-%H-%M-%S}_${slug:2}

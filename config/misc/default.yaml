@@ -1,0 +1,11 @@
+# @package _global_
+run_name: ${now:%y-%m-%d-%H-%M-%S}_${slug:2}
+
+tags: []
+description: ""
+pre_fit_validation: true
+predict: false
+
+seed: null
+num_threads: 1
+float32_matmul_precision: high

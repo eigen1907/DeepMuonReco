@@ -1,12 +1,28 @@
 # @package _global_
 
-fit:
-  num_epochs: 2
+exp:
+  name: "debug"
+
+hydra:
+  job_logging:
+    root:
+      level: DEBUG
+
+trainer:
+  max_epochs: 1
+  devices: 1
+  deterministic: false
+  benchmark: true
+  detect_anomaly: true
+  enable_progress_bar: true
+  log_every_n_steps: 1
+
+  profiler:
+    _target_: lightning.pytorch.profilers.SimpleProfiler
+    dirpath: ${paths.run_dir}/profile
+    filename: profile
+    extended: true
 
 data:
-  train_set:
-    max_events: ${eval:'2 * ${data.batch_size}'}
-  val_set:
-    max_events: ${eval:'2 * ${data.eval_batch_size}'}
-  test_set:
-    max_events: ${eval:'2 * ${data.eval_batch_size}'}
+  num_workers: 0
+  pin_memory: false

@@ -1,0 +1,26 @@
+dim_model: 64
+dim_feedforward: 128
+activation: gelu
+num_heads: 8
+num_layers: 4
+dropout: 0.1
+
+module:
+  _target_: deepmuonreco.nn.VanillaTransformerModel
+  dim_model: ${model.dim_model} # Dimension of the model embeddings
+  dim_feedforward: ${model.dim_feedforward} # Dimension of the feed-forward network
+  activation: ${model.activation} # Activation function (e.g., 'gelu', 'relu')
+  num_heads: ${model.num_heads} # Number of heads for multi-head attention
+  num_layers: ${model.num_layers} # Number of transformer layers
+  dropout: ${model.dropout} # Dropout probability
+
+in_keys:
+  - track_prep
+  - [pad_masks, track]
+  - segment_prep
+  - [pad_masks, segment]
+  - rechit_prep
+  - [pad_masks, rechit]
+
+out_keys:
+  - logits

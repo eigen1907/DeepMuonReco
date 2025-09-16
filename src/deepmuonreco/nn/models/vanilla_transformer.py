@@ -5,7 +5,12 @@ from ..utils import make_cross_attn_mask, make_self_attn_mask
 from deepmuonreco.data import InnerTrackSelectionDataset
 
 
-class InnerTrackSelectionTransformer(nn.Module):
+__all__ = [
+    'VanillaTransformerModel',
+]
+
+
+class VanillaTransformerModel(nn.Module):
 
     def __init__(
         self,

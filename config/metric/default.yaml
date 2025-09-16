@@ -1,5 +1,5 @@
 val:
-  postprocessing:
+  pre_metric_postprocessing:
     modules: []
 
   metric:
@@ -31,7 +31,7 @@ val:
 ################################################################################
 test:
 
-  postprocessing:
+  pre_metric_postprocessing:
     modules:
       - name: target_to_long
         module:
@@ -57,8 +57,10 @@ test:
         metric:
           _target_: deepmuonreco.metrics.MaskingWrapper
           metric:
-            _target_: torchmetrics.classification.BinaryROC
-            compute_on_cpu: true
+            _target_: deepmuonreco.metrics.PlotWrapper
+            metric:
+              _target_: torchmetrics.classification.BinaryROC
+              compute_on_cpu: true
         in_keys:
           - [masks, track] # mask
           - score

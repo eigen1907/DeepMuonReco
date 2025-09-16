@@ -3,6 +3,7 @@ from logging import getLogger
 from tensordict.nn import TensorDictModule, TensorDictSequential
 from omegaconf import DictConfig, ListConfig
 from hydra.utils import instantiate
+from lightning.pytorch.trainer.states import RunningStage
 from torchmetrics import MetricCollection
 from ..metrics import TensorDictWrapper
 
@@ -83,6 +84,7 @@ def build_tensordictsequential(
 
 def build_metric_collection(
     config: DictConfig,
+    stage: RunningStage,
     instantiation: bool = True,
 ) -> MetricCollection:
     """
@@ -96,13 +98,12 @@ def build_metric_collection(
         for key, value in config.metrics.items()
     }
 
-    prefix = config.get('prefix', None)
     postfix = config.get('postfix', None)
     compute_groups: bool | list[list[str]] = config.get('compute_groups', True)
 
     return MetricCollection(
         metrics=metrics,
-        prefix=prefix,
+        prefix=f'{stage.value}_',
         postfix=postfix,
         compute_groups=compute_groups,
     )
