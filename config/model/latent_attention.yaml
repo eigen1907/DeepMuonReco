@@ -1,0 +1,39 @@
+model_dim: 128
+num_heads: 8
+track_latent_len: 64
+muon_det_latent_len: 16
+encoder_num_layers: 4
+decoder_num_layers: 4
+widening_factor: 4
+dropout_p: 0.01
+
+
+module:
+  _target_: deepmuonreco.nn.LatentAttentionModel
+
+  track_dim: ${exp.track_dim}
+  segment_dim: ${exp.segment_dim}
+  hit_dim: ${exp.hit_dim}
+  output_dim: ${exp.target_dim}
+
+  model_dim: ${model.model_dim}
+  num_heads: ${model.num_heads}
+  track_latent_len: ${model.track_latent_len}
+  muon_det_latent_len: ${model.muon_det_latent_len}
+  encoder_num_layers: ${model.encoder_num_layers}
+  decoder_num_layers: ${model.decoder_num_layers}
+  widening_factor: ${model.widening_factor}
+  dropout_p: ${model.dropout_p}
+
+
+
+in_keys:
+  - track
+  - [masks, track]
+  - segment
+  - [masks, segment]
+  - rechit
+  - [masks, rechit]
+
+out_keys:
+  - logits
