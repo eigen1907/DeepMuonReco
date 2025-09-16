@@ -1,4 +1,4 @@
-from logging import Logger
+from logging import getLogger
 from typing import cast
 from functools import partial
 import torch
@@ -24,7 +24,7 @@ from .utils.config import build_metric_collection
 from .utils.optim import group_parameters
 
 
-_logger: Logger = Logger(__name__)
+_logger = getLogger(__name__)
 
 
 
