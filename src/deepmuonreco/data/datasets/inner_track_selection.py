@@ -190,21 +190,21 @@ class InnerTrackSelectionDataset(Dataset):
                 chunk['segment'].append(x)
 
             # NOTE: reconstructed hits in the muon system
-            chunk['hit'] = []
+            chunk['rechit'] = []
             for feature in cls.RECHIT_FEATURE_LIST:
                 x = [
                     file[f'{prefix}_rechit_{feature}'][:stop]
                     for prefix in ['rpc', 'gem']
                 ]
                 x = [np.concat(each) for each in zip(*x)]
-                chunk['hit'].append(x)
+                chunk['rechit'].append(x)
 
             chunk['target'] = [
-                torch.from_numpy(each.astype(np.int64))
+                torch.from_numpy(each.astype(np.float32))
                 for each in file['is_trackermuon'][:stop]
             ]
 
-        for key in ['track', 'segment', 'hit']:
+        for key in ['track', 'segment', 'rechit']:
             chunk[key] = stack_features(chunk[key])
 
         return [
