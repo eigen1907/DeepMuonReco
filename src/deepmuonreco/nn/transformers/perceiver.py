@@ -1,8 +1,8 @@
+import math
 import torch
 from torch import nn
 from torch import Tensor
 import einops as eo
-from torch.nn.modules.transformer import _get_clones
 from .transformer import CrossAttentionBlock, TransformerEncoderLayer
 from .transformer import MLPBlock
 
@@ -35,7 +35,7 @@ class PerceiverEncoder(nn.Module):
         """
         super().__init__()
 
-        self.latent = nn.Parameter(data=torch.randn(latent_len, latent_dim))
+        self.latent = self._make_latent(latent_len, latent_dim)
 
         self.attention = CrossAttentionBlock(
             embed_dim=latent_dim,
@@ -53,6 +53,24 @@ class PerceiverEncoder(nn.Module):
             widening_factor=widening_factor,
             dropout_p=dropout_p,
         )
+
+    def _make_latent(self, latent_len: int, latent_dim: int) -> nn.Parameter:
+        """
+        adapted from:
+            - https://github.com/google-deepmind/hierarchical_perceiver/blob/b3074a4/perceiver_helpers.py#L145-L167
+            - https://github.com/google-deepmind/dm-haiku/blob/v0.0.14/haiku/_src/initializers.py#L152-L234
+            - https://github.com/google-deepmind/dm-haiku/blob/v0.0.14/haiku/_src/initializers.py#L97C1-L131C28
+        """
+        latent = torch.empty(latent_len, latent_dim)
+        fan_in, _ = nn.init._calculate_fan_in_and_fan_out(latent)
+        scale = 1
+        n = max(1, fan_in)
+        s = scale / n
+        stddev = math.sqrt(s)
+        stddev = stddev / .87962566103423978
+        nn.init.trunc_normal_(tensor=latent, mean=0, std=stddev, a=-2, b=+2)
+        return nn.Parameter(data=latent)
+
 
     def forward(
         self,
