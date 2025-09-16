@@ -5,8 +5,8 @@ defaults:
 
 data:
   root: ${paths.root_dir}/data
-  train_file: sanity-check.root
-  val_file: sanity-check.root
-  test_file: sanity-check.root
-  predict_file: sanity-check.root
+  train_file: sanity-check.h5
+  val_file: sanity-check.h5
+  test_file: sanity-check.h5
+  predict_file: sanity-check.h5
   batch_size: 32
