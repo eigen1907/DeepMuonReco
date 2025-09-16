@@ -68,7 +68,7 @@ class CrossAttentionBlock(nn.Module):
         target: Tensor,
         source: Tensor,
         attn_mask: Tensor | None,
-    ) -> tuple[Tensor, Tensor]:
+    ) -> Tensor:
         """
         """
         # identity
@@ -122,7 +122,7 @@ class SelfAttentionBlock(nn.Module):
         self,
         input: Tensor,
         attn_mask: Tensor | None,
-    ) -> tuple[Tensor, Tensor]:
+    ) -> Tensor:
         """
         Args:
             input: tensor, float, (N, L, E)
@@ -214,7 +214,7 @@ class TransformerEncoderLayer(nn.Module):
         self,
         input: Tensor,
         attn_mask: Tensor | None,
-    ) -> tuple[Tensor, Tensor]:
+    ) -> Tensor:
         """
         """
         output = self.attention(
