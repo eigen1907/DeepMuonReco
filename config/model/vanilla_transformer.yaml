@@ -15,11 +15,11 @@ module:
   dropout: ${model.dropout} # Dropout probability
 
 in_keys:
-  - track
+  - track_prep
   - [pad_masks, track]
-  - segment
+  - segment_prep
   - [pad_masks, segment]
-  - rechit
+  - rechit_prep
   - [pad_masks, rechit]
 
 out_keys:

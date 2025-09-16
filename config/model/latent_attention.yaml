@@ -26,13 +26,12 @@ module:
   dropout_p: ${model.dropout_p}
 
 
-
 in_keys:
-  - track
+  - track_prep
   - [masks, track]
-  - segment
+  - segment_prep
   - [masks, segment]
-  - rechit
+  - rechit_prep
   - [masks, rechit]
 
 out_keys:
