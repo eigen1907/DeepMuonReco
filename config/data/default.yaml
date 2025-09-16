@@ -4,9 +4,9 @@ dataset: deepmuonreco.data.InnerTrackSelectionDataset
 
 root: ${paths.data_dir}
 
-train_file: train.root
-val_file: val.root
-test_file: val.root
+train_file: train.h5
+val_file: val.h5
+test_file: val.h5
 predict_file: null
 
 batch_size: 32
