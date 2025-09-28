@@ -1,10 +1,12 @@
-model_dim: 128
+model_dim: 64
 num_heads: 8
 track_latent_len: 64
 muon_det_latent_len: 16
-encoder_num_layers: 4
-decoder_num_layers: 4
-widening_factor: 4
+muon_det_num_processors: 2
+muon_det_processor_block_weight_sharing: true
+encoder_num_layers: 2
+decoder_num_layers: 1
+widening_factor: 2
 dropout_p: 0.01
 
 
@@ -20,6 +22,8 @@ module:
   num_heads: ${model.num_heads}
   track_latent_len: ${model.track_latent_len}
   muon_det_latent_len: ${model.muon_det_latent_len}
+  muon_det_num_processors: ${model.muon_det_num_processors}
+  muon_det_processor_block_weight_sharing: ${model.muon_det_processor_block_weight_sharing}
   encoder_num_layers: ${model.encoder_num_layers}
   decoder_num_layers: ${model.decoder_num_layers}
   widening_factor: ${model.widening_factor}
