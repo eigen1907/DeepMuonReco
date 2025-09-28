@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch import Tensor
-from ..transformers.perceiver import PerceiverEncoder
+from ..transformers.perceiver import PerceiverEncoder, PerceiverProcessorBlock
 from ..transformers.transformer import TransformerDecoder
 
 
@@ -27,6 +27,8 @@ class LatentAttentionModel(nn.Module):
         num_heads: int,
         track_latent_len: int,
         muon_det_latent_len: int,
+        muon_det_num_processors: int,
+        muon_det_processor_block_weight_sharing: bool,
         encoder_num_layers: int,
         decoder_num_layers: int,
         dropout_p: float = 0.1,
@@ -62,6 +64,15 @@ class LatentAttentionModel(nn.Module):
             widening_factor=widening_factor,
             dropout_p=dropout_p,
             bias=True,
+        )
+
+        self.muon_det_processor = PerceiverProcessorBlock(
+            num_layers=muon_det_num_processors,
+            latent_dim=model_dim,
+            num_heads=num_heads,
+            widening_factor=widening_factor,
+            dropout_p=dropout_p,
+            weight_sharing=muon_det_processor_block_weight_sharing,
         )
 
         self.encoder = TransformerDecoder(
@@ -138,6 +149,10 @@ class LatentAttentionModel(nn.Module):
         muon_det_latent = self.muon_det_encoder(
             input=muon_det_embed,
             data_mask=muon_det_data_mask,
+        )
+
+        muon_det_latent = self.muon_det_processor(
+            latent=muon_det_latent,
         )
 
         # NOTE: tracker track encoding

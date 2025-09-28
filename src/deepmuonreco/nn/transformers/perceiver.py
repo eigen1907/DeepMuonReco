@@ -1,7 +1,9 @@
 import math
+import warnings
 import torch
 from torch import nn
 from torch import Tensor
+from torch.nn.modules.transformer import _get_clones
 import einops as eo
 from .transformer import CrossAttentionBlock, TransformerEncoderLayer
 from .transformer import MLPBlock
@@ -10,6 +12,7 @@ from .transformer import MLPBlock
 __all__ = [
     'PerceiverEncoder',
     'PerceiverProcessor',
+    'PerceiverProcessorBlock',
     'PerceiverBasicDecoder',
     'PerceiverLatentQueryDecoder',
 ]
@@ -123,6 +126,49 @@ class PerceiverProcessor(TransformerEncoderLayer):
         """
         """
         return super().forward(input=latent, attn_mask=None)
+
+
+class PerceiverProcessorBlock(nn.Module):
+
+    def __init__(
+        self,
+        num_layers: int,
+        latent_dim: int,
+        num_heads: int,
+        widening_factor: int = 4,
+        dropout_p: float = 0,
+        weight_sharing: bool = False,
+    ) -> None:
+        """
+        """
+        super().__init__()
+        if num_layers < 0:
+            raise ValueError(f'num_layers should be a positive integer. got {num_layers}.')
+        elif num_layers == 0:
+            warnings.warn('num_layers is 0. the module will be a pass-through.')
+
+        layer = PerceiverProcessor(
+            model_dim=latent_dim,
+            num_heads=num_heads,
+            widening_factor=widening_factor,
+            dropout_p=dropout_p,
+        )
+
+        if weight_sharing:
+            self.layer_list = nn.ModuleList([layer] * num_layers)
+        else:
+            self.layer_list = _get_clones(module=layer, N=num_layers)
+
+    def forward(
+        self,
+        latent: Tensor,
+    ) -> Tensor:
+        """
+        """
+        output = latent
+        for layer in self.layer_list:
+            output = layer(latent=output)
+        return output
 
 
 class PerceiverBasicDecoder(nn.Module):
