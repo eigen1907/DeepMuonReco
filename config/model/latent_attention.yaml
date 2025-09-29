@@ -3,7 +3,7 @@ num_heads: 8
 track_latent_len: 64
 muon_det_latent_len: 16
 muon_det_num_processors: 2
-muon_det_processor_block_weight_sharing: true
+muon_det_processor_block_weight_sharing: false
 encoder_num_layers: 2
 decoder_num_layers: 1
 widening_factor: 2
