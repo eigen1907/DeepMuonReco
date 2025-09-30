@@ -21,12 +21,14 @@ class Indexible(Module, metaclass=abc.ABCMeta):
 
     def forward(self, input: Tensor) -> Tensor:
         """
+        Applies a transformation to the specified feature indices of the input tensor.
+
         Args:
             input (Tensor): Input tensor with the shape of (N, L, D), where N
                 is the batch size, L is the sequence length, and D is the feature dimension.
         Returns:
             output (Tensor): Output tensor with the same shape as input, where
-                the specified indices are transformed using signed log1p.
+                the specified indices are transformed using the transformation defined in the subclass.
         """
         output = input.clone()
         if self.index is None:
