@@ -2,7 +2,7 @@
 from socket import gethostname
 from getpass import getuser
 import sys
-from logging import getLogger
+from logging import getLogger, WARNING
 from pathlib import Path
 from aim.pytorch_lightning import AimLogger
 import hydra
@@ -18,6 +18,13 @@ from deepmuonreco.nn.utils import init_params
 
 
 _logger = getLogger(__name__)
+
+# FIXME: config?
+getLogger('matplotlib').setLevel(WARNING)
+getLogger('PIL').setLevel(WARNING)
+getLogger('aim').setLevel(WARNING)
+getLogger('filelock').setLevel(WARNING)
+
 
 
 OmegaConf.register_new_resolver(
