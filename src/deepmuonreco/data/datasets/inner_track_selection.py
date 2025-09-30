@@ -110,7 +110,6 @@ class InnerTrackSelectionDataset(Dataset):
         return stop
 
 
-    # FIXME:
     @classmethod
     def from_root(
         cls,
