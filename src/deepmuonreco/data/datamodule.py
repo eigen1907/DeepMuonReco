@@ -28,6 +28,10 @@ class DataModule(LightningDataModule):
         test_file: str | None = None,
         predict_file: str | None = None,
         #
+        track_feature_list: list[str] | None = None,
+        segment_feature_list: list[str] | None = None,
+        hit_feature_list: list[str] | None = None,
+        #
         batch_size: int = 256,
         eval_batch_size: int = 256,
         train_sampler: Callable | None = None,
@@ -60,10 +64,15 @@ class DataModule(LightningDataModule):
             raise FileNotFoundError(f'File {path} does not exist.')
         _logger.info(f'Loading {prefix} set from {path}')
 
+        kwargs = {}
+        for key in ['track_feature_list', 'segment_feature_list', 'hit_feature_list']:
+            kwargs[key] = self.hparams[key]
+
         with elapsed_timer() as elapsed_time:
             dataset = dataset_cls(
                 path=path,
                 max_events=self.hparams[f'{prefix}_max_events'],
+                **kwargs,
             )
 
         # logging the dataset, the number of examples  for debugging

@@ -9,6 +9,10 @@ val_file: val.h5
 test_file: val.h5
 predict_file: null
 
+track_feature_list: ${exp.track_feature_list}
+segment_feature_list: ${exp.segment_feature_list}
+hit_feature_list: ${exp.hit_feature_list}
+
 batch_size: 32
 eval_batch_size: 32
 train_sampler: null

@@ -1,4 +1,5 @@
 from pathlib import Path
+from logging import getLogger
 import uproot
 import h5py as h5
 import numpy as np
@@ -9,19 +10,35 @@ from tensordict import TensorDict
 from tensordict import pad_sequence
 
 
+_logger = getLogger(__name__)
+
+
 class InnerTrackSelectionDataset(Dataset):
 
     TRACK_FEATURE_LIST = [
-        'px', 'py', 'eta',
+        'px', 'py', 'pz',
+        'vx', 'vy', 'vz',
+        'charge',
+        'chi2', 'ndof',
+        'dsz', 'dsz_error',
+        'dxy', 'dxy_error',
+        'lambda', 'lambda_error',
+        'phi', 'phi_error',
+        'qoverp', 'qoverp_error',
     ]
 
     SEGMENT_FEATURE_LIST = [
-        'position_x', 'position_y', 'position_z',
-        'direction_x', 'direction_y', 'direction_z',
+        'pos_x', 'pos_y', 'pos_z',
+        'pos_err_x', 'pos_err_y',
+        'dir_x', 'dir_y', 'dir_z',
+        'dir_err_x', 'dir_err_y',
+        'chi2', 'dof',
     ]
 
     RECHIT_FEATURE_LIST = [
-        'position_x', 'position_y', 'position_z',
+        'pos_x', 'pos_y', 'pos_z',
+        'pos_err_x', 'pos_err_y',
+        'bx', 'cls_size',
     ]
 
     DIM_TRACK = len(TRACK_FEATURE_LIST)
@@ -29,8 +46,25 @@ class InnerTrackSelectionDataset(Dataset):
     DIM_RECHIT = len(RECHIT_FEATURE_LIST)
     DIM_TARGET = 1
 
-    def __init__(self, path: str | Path, max_events: int | float | None = None):
+    def __init__(
+        self,
+        path: str | Path,
+        max_events: int | float | None = None,
+        track_feature_list: list[str] | None = None,
+        segment_feature_list: list[str] | None = None,
+        hit_feature_list: list[str] | None = None,
+    ):
         super().__init__()
+
+        track_feature_list = track_feature_list or self.TRACK_FEATURE_LIST
+        segment_feature_list = segment_feature_list or self.SEGMENT_FEATURE_LIST
+        hit_feature_list = hit_feature_list or self.RECHIT_FEATURE_LIST
+
+        _logger.info(f"Loading data from {path} ...")
+        _logger.info(f"  Track features: {track_feature_list}")
+        _logger.info(f"  Segment features: {segment_feature_list}")
+        _logger.info(f"  Hit features: {hit_feature_list}")
+
 
         path = Path(path)
 
@@ -41,7 +75,13 @@ class InnerTrackSelectionDataset(Dataset):
         else:
             raise ValueError(f"Unsupported file format: {path.suffix}")
 
-        self.example_list = loader(path, max_events=max_events)
+        self.example_list = loader(
+            path=path,
+            max_events=max_events,
+            track_feature_list=track_feature_list,
+            segment_feature_list=segment_feature_list,
+            hit_feature_list=hit_feature_list,
+        )
 
     def __getitem__(self, index: int) -> TensorDict:
         return self.example_list[index]
@@ -70,11 +110,15 @@ class InnerTrackSelectionDataset(Dataset):
         return stop
 
 
+    # FIXME:
     @classmethod
     def from_root(
         cls,
         path: str | Path,
-        max_events: int | float | None = None,
+        max_events: int | float | None,
+        track_feature_list: list[str],
+        segment_feature_list: list[str],
+        hit_feature_list: list[str],
         treepath: str = 'muons1stStep/event',
     ) -> list[TensorDict]:
         with uproot.open(path) as file:
@@ -134,7 +178,7 @@ class InnerTrackSelectionDataset(Dataset):
             rechit_list.append(torch.tensor(rec_arr, dtype=torch.float))
 
             # --- target (is_trackermuon): [is_trackermuon] -> [is_trackermuon]
-            tgt = ak.to_numpy(chunk.is_trackermuon[i])
+            tgt = ak.to_numpy(chunk.is_tracker_muon[i])
             target_list.append(torch.tensor(tgt, dtype=torch.float))
 
         example_chunk: list[TensorDict] = []
@@ -154,7 +198,14 @@ class InnerTrackSelectionDataset(Dataset):
 
 
     @classmethod
-    def from_hdf5(cls, path: str | Path, max_events: int | float | None = None) -> list[TensorDict]:
+    def from_hdf5(
+        cls,
+        path: str | Path,
+        max_events: int | float | None,
+        track_feature_list: list[str],
+        segment_feature_list: list[str],
+        hit_feature_list: list[str],
+    ) -> list[TensorDict]:
         """
         For the HDF5 files, we assume that event cleaning has already been
         performed: events without tracker tracks or without segments/hits in
@@ -176,14 +227,14 @@ class InnerTrackSelectionDataset(Dataset):
             # NOTE: reconstructed tracks in the tracker
             chunk['track'] = [
                 file[f'track_{each}'][:stop]
-                for each in cls.TRACK_FEATURE_LIST
+                for each in track_feature_list
             ]
 
             # NOTE: reconstructed segments in the muon system
             chunk['segment'] = []
-            for feature in cls.SEGMENT_FEATURE_LIST:
+            for feature in segment_feature_list:
                 x = [
-                    file[f'{prefix}_segment_{feature}'][:stop]
+                    file[f'{prefix}_seg_{feature}'][:stop]
                     for prefix in ['dt', 'csc']
                 ]
                 x = [np.concat(each) for each in zip(*x)]
@@ -191,9 +242,9 @@ class InnerTrackSelectionDataset(Dataset):
 
             # NOTE: reconstructed hits in the muon system
             chunk['rechit'] = []
-            for feature in cls.RECHIT_FEATURE_LIST:
+            for feature in hit_feature_list:
                 x = [
-                    file[f'{prefix}_rechit_{feature}'][:stop]
+                    file[f'{prefix}_hit_{feature}'][:stop]
                     for prefix in ['rpc', 'gem']
                 ]
                 x = [np.concat(each) for each in zip(*x)]
@@ -201,7 +252,7 @@ class InnerTrackSelectionDataset(Dataset):
 
             chunk['target'] = [
                 torch.from_numpy(each.astype(np.float32))
-                for each in file['is_trackermuon'][:stop]
+                for each in file['is_tracker_muon'][:stop]
             ]
 
         for key in ['track', 'segment', 'rechit']:

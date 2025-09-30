@@ -14,12 +14,12 @@ class VanillaTransformerModel(nn.Module):
 
     def __init__(
         self,
-        dim_track: int = InnerTrackSelectionDataset.DIM_TRACK,
-        dim_segment: int = InnerTrackSelectionDataset.DIM_SEGMENT,
-        dim_rechit: int = InnerTrackSelectionDataset.DIM_RECHIT,
-        dim_output: int = InnerTrackSelectionDataset.DIM_TARGET,
-        dim_model: int = 64,
-        dim_feedforward: int = 128,
+        track_dim: int,
+        segment_dim: int,
+        hit_dim: int,
+        output_dim: int,
+        model_dim: int = 64,
+        feedforward_dim: int = 128,
         activation: str = 'relu',
         num_heads: int = 2,
         num_layers: int = 1,
@@ -31,26 +31,26 @@ class VanillaTransformerModel(nn.Module):
 
         # Track embedding (px, py, eta)
         self.track_embedder = nn.Linear(
-            in_features=dim_track,
-            out_features=dim_model,
+            in_features=track_dim,
+            out_features=model_dim,
         )
 
         # DT/CSC segment embedding (position + direction; dimension: 6)
         self.segment_embedder = nn.Linear(
-            in_features=dim_segment,
-            out_features=dim_model,
+            in_features=segment_dim,
+            out_features=model_dim,
         )
 
         # RPC/GEM rechit embedding (position only; dimension: 3)
         self.rechit_embedder = nn.Linear(
-            in_features=dim_rechit,
-            out_features=dim_model,
+            in_features=hit_dim,
+            out_features=model_dim,
         )
 
         layer = nn.TransformerDecoderLayer(
-            d_model=dim_model,
+            d_model=model_dim,
             nhead=num_heads,
-            dim_feedforward=dim_feedforward,
+            dim_feedforward=feedforward_dim,
             dropout=dropout,
             activation=activation,
             batch_first=True,
@@ -64,8 +64,8 @@ class VanillaTransformerModel(nn.Module):
         )
 
         self.classification_head = nn.Linear(
-            in_features=dim_model,
-            out_features=dim_output,
+            in_features=model_dim,
+            out_features=output_dim,
         )
 
     def forward(

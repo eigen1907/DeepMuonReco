@@ -1,5 +1,5 @@
-dim_model: 64
-dim_feedforward: 128
+model_dim: 64
+feedforward_dim: 128
 activation: gelu
 num_heads: 8
 num_layers: 4
@@ -7,8 +7,14 @@ dropout: 0.1
 
 module:
   _target_: deepmuonreco.nn.VanillaTransformerModel
-  dim_model: ${model.dim_model} # Dimension of the model embeddings
-  dim_feedforward: ${model.dim_feedforward} # Dimension of the feed-forward network
+
+  track_dim: ${exp.track_dim}
+  segment_dim: ${exp.segment_dim}
+  hit_dim: ${exp.hit_dim}
+  output_dim: ${exp.target_dim}
+
+  model_dim: ${model.model_dim} # Dimension of the model embeddings
+  feedforward_dim: ${model.feedforward_dim} # Dimension of the feed-forward network
   activation: ${model.activation} # Activation function (e.g., 'gelu', 'relu')
   num_heads: ${model.num_heads} # Number of heads for multi-head attention
   num_layers: ${model.num_layers} # Number of transformer layers
