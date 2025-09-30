@@ -9,11 +9,14 @@ import numpy as np
 def convert(input_file_path: Path, treepath: str):
     if not input_file_path.exists():
         raise FileNotFoundError(f'Input file does not exist: {input_file_path}')
+    print(f'Converting {input_file_path} to HDF5 format...')
 
     output_file_path = input_file_path.with_suffix('.h5')
     if output_file_path.exists():
         raise FileExistsError(f'Output file already exists: {output_file_path}')
+    print(f'Output file will be: {output_file_path}')
 
+    print(f'Reading data from {input_file_path}:{treepath}...')
     with uproot.open(input_file_path) as input_file:
         data = input_file[treepath].arrays(library='np')
 
@@ -29,28 +32,6 @@ def convert(input_file_path: Path, treepath: str):
                 data=value,
             )
 
-        track_px = [
-            (pt * np.cos(phi)).astype(np.float32)
-            for pt, phi in zip(data['track_pt'], data['track_phi'])
-        ]
-
-        track_py = [
-            (pt * np.sin(phi)).astype(np.float32)
-            for pt, phi in zip(data['track_pt'], data['track_phi'])
-        ]
-
-        output_file.create_dataset(
-            name='track_px',
-            shape=(len(track_px), ),
-            dtype=h5.vlen_dtype(np.float32),
-            data=track_px,
-        )
-        output_file.create_dataset(
-            name='track_py',
-            shape=(len(track_py), ),
-            dtype=h5.vlen_dtype(np.float32),
-            data=track_py,
-        )
 
 
 def run(input_file_path_list: list[Path], treepath: str):
