@@ -8,8 +8,8 @@ defaults:
   - data: default
 
   - augmentation: none
-  - preprocessing: default
-  - model: vanilla_transformer
+  - preprocessing: ${exp}
+  - model: latent_attention
   - postprocessing: default
 
   - metric: default
