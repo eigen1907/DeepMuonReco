@@ -13,8 +13,8 @@ track_feature_list: ${exp.track_feature_list}
 segment_feature_list: ${exp.segment_feature_list}
 hit_feature_list: ${exp.hit_feature_list}
 
-batch_size: 32
-eval_batch_size: 32
+batch_size: 128
+eval_batch_size: 128
 train_sampler: null
 
 num_workers: 0
