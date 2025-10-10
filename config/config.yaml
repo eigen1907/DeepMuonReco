@@ -3,12 +3,12 @@
 defaults:
   - _self_
 
-  - exp: default
+  - exp: pq
   - paths: default
   - data: default
 
   - augmentation: none
-  - preprocessing: ${exp}
+  - preprocessing: pq_log
   - model: latent_attention
   - postprocessing: default
 
