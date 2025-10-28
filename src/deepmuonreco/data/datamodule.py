@@ -23,14 +23,16 @@ class DataModule(LightningDataModule):
         self,
         dataset: str,
         root: str,
+        #
+        tracker_track_feature_list: list[str],
+        dt_segment_feature_list: list[str],
+        csc_segment_feature_list: list[str],
+        rpc_hit_feature_list: list[str],
+        gem_hit_feature_list: list[str],
         train_file: str | None = None,
         val_file: str | None = None,
         test_file: str | None = None,
         predict_file: str | None = None,
-        #
-        track_feature_list: list[str] | None = None,
-        segment_feature_list: list[str] | None = None,
-        hit_feature_list: list[str] | None = None,
         #
         batch_size: int = 256,
         eval_batch_size: int = 256,
@@ -65,7 +67,14 @@ class DataModule(LightningDataModule):
         _logger.info(f'Loading {prefix} set from {path}')
 
         kwargs = {}
-        for key in ['track_feature_list', 'segment_feature_list', 'hit_feature_list']:
+        key_list = [
+            'tracker_track_feature_list',
+            'dt_segment_feature_list',
+            'csc_segment_feature_list',
+            'rpc_hit_feature_list',
+            'gem_hit_feature_list',
+        ]
+        for key in key_list:
             kwargs[key] = self.hparams[key]
 
         with elapsed_timer() as elapsed_time:

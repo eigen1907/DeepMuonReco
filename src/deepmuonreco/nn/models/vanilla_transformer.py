@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 from ..utils import make_cross_attn_mask, make_self_attn_mask
-from deepmuonreco.data import InnerTrackSelectionDataset
 
 
 __all__ = [

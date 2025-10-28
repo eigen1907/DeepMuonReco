@@ -174,7 +174,7 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
-    parser.add_argument('-cn', '--config-name', type=str, default='config', help='config name') # TODO: choices
+    parser.add_argument('-cn', '--config-name', type=str, default='tracker_track_selection', help='config name') # TODO: choices
 
     for sub_config_dir in config_dir.glob('*'):
         if not sub_config_dir.is_dir():

@@ -1,0 +1,97 @@
+tracker_track: [
+    'px', 'py', 'pz',
+    'vx', 'vy', 'vz',
+    'charge',
+]
+
+dt_segment: [
+    'pos_x', 'pos_y', 'pos_z',
+    'dir_x', 'dir_y', 'dir_z',
+]
+
+csc_segment: [
+    'pos_x', 'pos_y', 'pos_z',
+    'dir_x', 'dir_y', 'dir_z',
+]
+
+rpc_hit: [
+    'pos_x', 'pos_y', 'pos_z',
+]
+
+gem_hit: [
+    'pos_x', 'pos_y', 'pos_z',
+]
+
+
+# the preprocessing parameters
+preprocessing:
+  tracker_track_log: # signeld log1p
+    # signed_log1p is applied to momentum and vertex position, not to charge
+    index: [
+      0, 1, 2, # px, py, pz
+      3, 4, 5, # vx, vy, vz
+    ]
+
+    # after log
+    mean: [
+      0, 0, 0,
+      0, 0, 0,
+      0
+    ]
+    std: [
+      0.692, 0.692, 1.779, # 1 std
+      0.274, 0.274, 1.411, # 1 std
+      1 # no scaling
+    ]
+
+    # FIXME:
+    offset: [
+      0, 0, 0,
+      0, 0, 0,
+      0,
+    ]
+
+    scale: [
+      6.908, 6.908, 6.908, # log1p(1000)
+      5, 5, 7,
+      1,
+    ]
+
+
+  dt_segment:
+    # [pos_x, pos_y, pos_z, dir_x, dir_y, dir_z]
+
+    offset: [
+      0, 0, 0, # pos_x, pos_y, pos_z
+      0, 0, 0, # dir_x, dir_y, dir_z
+    ]
+    scale: [
+      780, 720, 653, # FIXME: check
+      1, 1, 1,
+    ]
+
+  csc_segment:
+    offset: [
+      0, 0, 0,
+      0, 0, 0
+    ]
+    scale: [
+      700, 700, 1037.8, # FIXME: check
+      1, 1, 1, # dir_x, dir_y, dir_z; max is 1
+    ]
+
+  rpc_hit:
+    offset: [
+      0, 0, 0
+    ]
+    scale: [
+      754.477, 704.550, 1066.155,
+    ]
+
+  gem_hit:
+    offset: [
+      0, 0, 0
+    ]
+    scale: [
+      241.471, 241.381, 571.811
+    ]

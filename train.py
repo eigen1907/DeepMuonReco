@@ -41,7 +41,7 @@ OmegaConf.register_new_resolver(
 
 @hydra.main(
     config_path='./config',
-    config_name='config',
+    config_name='tracker_track_selection',
     version_base=None,
 )
 def main(config: DictConfig):
