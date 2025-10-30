@@ -1,0 +1,67 @@
+modules:
+
+  # NOTE: track: [px, py, pz, q]
+  - name: tracker_track_log
+    module:
+      _target_: deepmuonreco.nn.SignedLog1p
+      index: ${feature_set.preprocessing.tracker_track_log.index}
+    in_keys:
+      - tracker_track
+    out_keys:
+      - tracker_track_prep
+
+  - name: tracker_track_norm
+    module:
+      _target_: deepmuonreco.nn.Normalize
+      offset: ${feature_set.preprocessing.tracker_track_log.offset}
+      scale: ${feature_set.preprocessing.tracker_track_log.scale}
+    in_keys:
+      - tracker_track_prep
+    out_keys:
+      - tracker_track_prep
+
+  # NOTE: DT segment:
+
+  - name: dt_seg_norm
+    module:
+      _target_: deepmuonreco.nn.Normalize
+      offset: ${feature_set.preprocessing.dt_segment.offset}
+      scale: ${feature_set.preprocessing.dt_segment.scale}
+    in_keys:
+      - dt_segment
+    out_keys:
+      - dt_segment_prep
+
+  # NOTE: CSC segment:
+  - name: csc_seg_norm
+    module:
+      _target_: deepmuonreco.nn.Normalize
+      offset: ${feature_set.preprocessing.csc_segment.offset}
+      scale: ${feature_set.preprocessing.csc_segment.scale}
+    in_keys:
+      - csc_segment
+    out_keys:
+      - csc_segment_prep
+
+  # NOTE: rpc_hit
+
+  - name: rpc_hit_norm
+    module:
+      _target_: deepmuonreco.nn.Normalize
+      offset: ${feature_set.preprocessing.rpc_hit.offset}
+      scale: ${feature_set.preprocessing.rpc_hit.scale}
+    in_keys:
+      - rpc_hit
+    out_keys:
+      - rpc_hit_prep
+
+  # NOTE: gem_hit
+  - name: gem_hit_norm
+    module:
+      _target_: deepmuonreco.nn.Normalize
+      offset: ${feature_set.preprocessing.gem_hit.offset}
+      scale: ${feature_set.preprocessing.gem_hit.scale}
+    in_keys:
+      - gem_hit
+    out_keys:
+      - gem_hit_prep

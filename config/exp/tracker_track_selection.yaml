@@ -1,0 +1,3 @@
+name: tracker-track-selection
+target_dim: 1 # binary classification for each track
+pos_weight: 30.0 # FIXME:

@@ -1,38 +1,55 @@
-model_dim: 128
+# hyperparameters
+model_dim: 64
 num_heads: 8
 track_latent_len: 64
 muon_det_latent_len: 16
-encoder_num_layers: 4
-decoder_num_layers: 4
+muon_det_num_processors: 1
+encoder_num_layers: 1
+decoder_num_layers: 1
 widening_factor: 4
 dropout_p: 0.01
 
+# input/output dimensions
+tracker_track_dim: ${eval:'len(${feature_set.tracker_track})'}
+dt_segment_dim: ${eval:'len(${feature_set.dt_segment})'}
+csc_segment_dim: ${eval:'len(${feature_set.csc_segment})'}
+rpc_hit_dim: ${eval:'len(${feature_set.rpc_hit})'}
+gem_hit_dim: ${eval:'len(${feature_set.gem_hit})'}
+output_dim: ${exp.target_dim}
 
+# model definition
 module:
   _target_: deepmuonreco.nn.LatentAttentionModel
 
-  track_dim: ${exp.track_dim}
-  segment_dim: ${exp.segment_dim}
-  hit_dim: ${exp.hit_dim}
-  output_dim: ${exp.target_dim}
+  tracker_track_dim: ${..tracker_track_dim}
+  dt_segment_dim: ${..dt_segment_dim}
+  csc_segment_dim: ${..csc_segment_dim}
+  rpc_hit_dim: ${..rpc_hit_dim}
+  gem_hit_dim: ${..gem_hit_dim}
+  output_dim: ${..output_dim}
 
-  model_dim: ${model.model_dim}
-  num_heads: ${model.num_heads}
-  track_latent_len: ${model.track_latent_len}
-  muon_det_latent_len: ${model.muon_det_latent_len}
-  encoder_num_layers: ${model.encoder_num_layers}
-  decoder_num_layers: ${model.decoder_num_layers}
-  widening_factor: ${model.widening_factor}
-  dropout_p: ${model.dropout_p}
-
+  model_dim: ${..model_dim}
+  num_heads: ${..num_heads}
+  track_latent_len: ${..track_latent_len}
+  muon_det_latent_len: ${..muon_det_latent_len}
+  muon_det_num_processors: ${..muon_det_num_processors}
+  muon_det_processor_block_weight_sharing: false
+  encoder_num_layers: ${..encoder_num_layers}
+  decoder_num_layers: ${..decoder_num_layers}
+  widening_factor: ${..widening_factor}
+  dropout_p: ${..dropout_p}
 
 in_keys:
-  - track_prep
-  - [masks, track]
-  - segment_prep
-  - [masks, segment]
-  - rechit_prep
-  - [masks, rechit]
+  - tracker_track_prep
+  - [masks, tracker_track]
+  - dt_segment_prep
+  - [masks, dt_segment]
+  - csc_segment_prep
+  - [masks, csc_segment]
+  - rpc_hit_prep
+  - [masks, rpc_hit]
+  - gem_hit_prep
+  - [masks, gem_hit]
 
 out_keys:
-  - logits
+  - logits # binary classification logits

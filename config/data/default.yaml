@@ -1,6 +1,6 @@
 _target_: deepmuonreco.data.DataModule
 
-dataset: deepmuonreco.data.InnerTrackSelectionDataset
+dataset: deepmuonreco.data.TrackerTrackSelectionDataset
 
 root: ${paths.data_dir}
 
@@ -9,8 +9,14 @@ val_file: val.h5
 test_file: val.h5
 predict_file: null
 
-batch_size: 32
-eval_batch_size: 32
+tracker_track_feature_list: ${feature_set.tracker_track}
+dt_segment_feature_list: ${feature_set.dt_segment}
+csc_segment_feature_list: ${feature_set.csc_segment}
+rpc_hit_feature_list: ${feature_set.rpc_hit}
+gem_hit_feature_list: ${feature_set.gem_hit}
+
+batch_size: 128
+eval_batch_size: 128
 train_sampler: null
 
 num_workers: 0

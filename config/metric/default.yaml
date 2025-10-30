@@ -12,7 +12,7 @@ val:
             _target_: torchmetrics.MeanMetric
             compute_on_cpu: true
         in_keys:
-          - [masks, track] # mask
+          - [masks, tracker_track] # mask
           - loss
 
       roc_auc:
@@ -22,7 +22,7 @@ val:
             _target_: torchmetrics.classification.BinaryAUROC
             compute_on_cpu: true
         in_keys:
-          - [masks, track] # mask
+          - [masks, tracker_track] # mask
           - score
           - target
 
@@ -62,6 +62,6 @@ test:
               _target_: torchmetrics.classification.BinaryROC
               compute_on_cpu: true
         in_keys:
-          - [masks, track] # mask
+          - [masks, tracker_track] # mask
           - score
           - target_long

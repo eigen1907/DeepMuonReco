@@ -1,8 +1,10 @@
+import math
+import warnings
 import torch
 from torch import nn
 from torch import Tensor
-import einops as eo
 from torch.nn.modules.transformer import _get_clones
+import einops as eo
 from .transformer import CrossAttentionBlock, TransformerEncoderLayer
 from .transformer import MLPBlock
 
@@ -10,6 +12,7 @@ from .transformer import MLPBlock
 __all__ = [
     'PerceiverEncoder',
     'PerceiverProcessor',
+    'PerceiverProcessorBlock',
     'PerceiverBasicDecoder',
     'PerceiverLatentQueryDecoder',
 ]
@@ -35,7 +38,7 @@ class PerceiverEncoder(nn.Module):
         """
         super().__init__()
 
-        self.latent = nn.Parameter(data=torch.randn(latent_len, latent_dim))
+        self.latent = self._make_latent(latent_len, latent_dim)
 
         self.attention = CrossAttentionBlock(
             embed_dim=latent_dim,
@@ -53,6 +56,24 @@ class PerceiverEncoder(nn.Module):
             widening_factor=widening_factor,
             dropout_p=dropout_p,
         )
+
+    def _make_latent(self, latent_len: int, latent_dim: int) -> nn.Parameter:
+        """
+        adapted from:
+            - https://github.com/google-deepmind/hierarchical_perceiver/blob/b3074a4/perceiver_helpers.py#L145-L167
+            - https://github.com/google-deepmind/dm-haiku/blob/v0.0.14/haiku/_src/initializers.py#L152-L234
+            - https://github.com/google-deepmind/dm-haiku/blob/v0.0.14/haiku/_src/initializers.py#L97C1-L131C28
+        """
+        latent = torch.empty(latent_len, latent_dim)
+        fan_in, _ = nn.init._calculate_fan_in_and_fan_out(latent)
+        scale = 1
+        n = max(1, fan_in)
+        s = scale / n
+        stddev = math.sqrt(s)
+        stddev = stddev / .87962566103423978
+        nn.init.trunc_normal_(tensor=latent, mean=0, std=stddev, a=-2, b=+2)
+        return nn.Parameter(data=latent)
+
 
     def forward(
         self,
@@ -105,6 +126,49 @@ class PerceiverProcessor(TransformerEncoderLayer):
         """
         """
         return super().forward(input=latent, attn_mask=None)
+
+
+class PerceiverProcessorBlock(nn.Module):
+
+    def __init__(
+        self,
+        num_layers: int,
+        latent_dim: int,
+        num_heads: int,
+        widening_factor: int = 4,
+        dropout_p: float = 0,
+        weight_sharing: bool = False,
+    ) -> None:
+        """
+        """
+        super().__init__()
+        if num_layers < 0:
+            raise ValueError(f'num_layers should be a positive integer. got {num_layers}.')
+        elif num_layers == 0:
+            warnings.warn('num_layers is 0. the module will be a pass-through.')
+
+        layer = PerceiverProcessor(
+            model_dim=latent_dim,
+            num_heads=num_heads,
+            widening_factor=widening_factor,
+            dropout_p=dropout_p,
+        )
+
+        if weight_sharing:
+            self.layer_list = nn.ModuleList([layer] * num_layers)
+        else:
+            self.layer_list = _get_clones(module=layer, N=num_layers)
+
+    def forward(
+        self,
+        latent: Tensor,
+    ) -> Tensor:
+        """
+        """
+        output = latent
+        for layer in self.layer_list:
+            output = layer(latent=output)
+        return output
 
 
 class PerceiverBasicDecoder(nn.Module):

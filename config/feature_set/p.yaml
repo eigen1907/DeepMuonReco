@@ -1,0 +1,26 @@
+track: [
+    'px', 'py', 'pz',
+]
+
+segment: [
+    'pos_x', 'pos_y', 'pos_z',
+    'dir_x', 'dir_y', 'dir_z',
+]
+
+hit: [
+    'pos_x', 'pos_y', 'pos_z',
+]
+
+
+preprocessing:
+  track:
+    offset: [0, 0, 0]
+    scale: [100, 100, 100]
+
+  segment:
+    offset: [0, 0, 0, 0, 0, 0]
+    scale: [750, 720, 1000, 1, 1, 1]
+
+  hit:
+    offset: [0, 0, 0]
+    scale: [750, 720, 1000]

@@ -2,7 +2,7 @@
 from socket import gethostname
 from getpass import getuser
 import sys
-from logging import getLogger
+from logging import getLogger, WARNING
 from pathlib import Path
 from aim.pytorch_lightning import AimLogger
 import hydra
@@ -19,6 +19,13 @@ from deepmuonreco.nn.utils import init_params
 
 _logger = getLogger(__name__)
 
+# FIXME: config?
+getLogger('matplotlib').setLevel(WARNING)
+getLogger('PIL').setLevel(WARNING)
+getLogger('aim').setLevel(WARNING)
+getLogger('filelock').setLevel(WARNING)
+
+
 
 OmegaConf.register_new_resolver(
     'slug',
@@ -34,7 +41,7 @@ OmegaConf.register_new_resolver(
 
 @hydra.main(
     config_path='./config',
-    config_name='config',
+    config_name='tracker_track_selection',
     version_base=None,
 )
 def main(config: DictConfig):
@@ -47,8 +54,9 @@ def main(config: DictConfig):
     with open(output_dir / 'config.yaml', 'w') as stream:
         OmegaConf.save(config=config, f=stream)
 
-    torch.set_num_threads(config.num_threads)
-    torch.set_float32_matmul_precision(precision=config.float32_matmul_precision)
+    torch.set_num_threads(config.torch.num_threads)
+    torch.set_num_interop_threads(config.torch.num_interop_threads)
+    torch.set_float32_matmul_precision(precision=config.torch.float32_matmul_precision)
 
     if config.seed:
         seed_everything(config.seed, workers=True)

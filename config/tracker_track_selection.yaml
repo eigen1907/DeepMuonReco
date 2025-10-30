@@ -3,13 +3,14 @@
 defaults:
   - _self_
 
-  - exp: default
+  - exp: tracker_track_selection
   - paths: default
-  - data: default
+  - data: default # define datamodule, which builds datasets, dataloaders, and samplers
+  - feature_set: pqv # feature set
 
   - augmentation: none
-  - preprocessing: default
-  - model: vanilla_transformer
+  - preprocessing: tracker_track_log_minmax # signed log1p for track
+  - model: latent_attention
   - postprocessing: default
 
   - metric: default
@@ -20,11 +21,12 @@ defaults:
   - optimizer: adamw
   - lr_scheduler: plateau
 
-  - trainer: gpu
+  - trainer: gpu_16-mixed
   - callbacks: default
   - logger: aim
 
   - misc: default
 
+  - torch: default
   - hydra: default
   - debug: null
