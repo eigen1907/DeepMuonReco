@@ -76,7 +76,7 @@ def main(config: DictConfig):
         callbacks=list(callback_dict.values()),
         logger=logger,
     )
-    datamodule: LightningDataModule = instantiate(config.data)
+    datamodule: LightningDataModule = instantiate(config.datamodule)
 
     if isinstance(logger, AimLogger):
         logger.experiment.name = config.run_name

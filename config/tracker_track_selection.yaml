@@ -5,7 +5,7 @@ defaults:
 
   - exp: tracker_track_selection
   - paths: default
-  - data: default
+  - datamodule: default
   - feature_set: pqv
 
   - augmentation: none
