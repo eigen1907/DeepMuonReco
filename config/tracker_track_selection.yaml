@@ -9,7 +9,7 @@ defaults:
   - feature_set: pqv
 
   - augmentation: none
-  - preprocessing: tracker_track_log_minmax
+  - preprocessing: tracker-track-log_minmax
   - model: latent_attention
   - postprocessing: default
 
