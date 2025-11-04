@@ -5,11 +5,11 @@ defaults:
 
   - exp: tracker_track_selection
   - paths: default
-  - data: default # define datamodule, which builds datasets, dataloaders, and samplers
-  - feature_set: pqv # feature set
+  - data: default
+  - feature_set: pqv
 
   - augmentation: none
-  - preprocessing: tracker_track_log_minmax # signed log1p for track
+  - preprocessing: tracker_track_log_minmax
   - model: latent_attention
   - postprocessing: default
 
