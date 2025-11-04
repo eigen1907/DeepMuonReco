@@ -1,6 +1,6 @@
 root_dir: ${oc.env:PROJECT_ROOT}
 log_dir: ${paths.root_dir}/logs/
-run_dir: ${paths.log_dir}/${exp.name}/${run_name}
+run_dir: ${paths.log_dir}/${exp.name}/${run.name}
 work_dir: ${hydra:runtime.cwd}
 
 data_dir: /hdfs/ml/deepmuonreco/data/CMSSW_14_0_21_patch1/mu2024pu/
