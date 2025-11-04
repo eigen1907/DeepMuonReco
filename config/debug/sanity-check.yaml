@@ -3,7 +3,7 @@
 defaults:
   - default
 
-data:
+datamodule:
   batch_size: 32
   eval_batch_size: 32
   train_max_events: 32
