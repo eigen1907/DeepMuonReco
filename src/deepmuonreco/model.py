@@ -36,8 +36,8 @@ class Model(LightningModule):
         preprocessing: TensorDictSequential,
         postprocessing: TensorDictSequential,
         model: TensorDictModule,
-        criterion: TensorDictModule,
-        criterion_reduction: TensorDictModule,
+        criterion_function: TensorDictSequential,
+        criterion_reduction: TensorDictSequential,
         val_pre_metric_postprocessing: TensorDictSequential,
         val_metrics: MetricCollection,
         test_pre_metric_postprocessing: TensorDictSequential,
@@ -53,7 +53,7 @@ class Model(LightningModule):
         self.val_pre_metric_postprocessing = val_pre_metric_postprocessing
         self.test_pre_metric_postprocessing = test_pre_metric_postprocessing
         self.model = model
-        self.criterion = criterion
+        self.criterion_function = criterion_function
         self.criterion_reduction = criterion_reduction
         self.val_metrics = val_metrics
         self.test_metrics = test_metrics
@@ -70,8 +70,8 @@ class Model(LightningModule):
 
         model = build_tensordictmodule(config.model)
 
-        criterion = build_tensordictmodule(config.criterion)
-        criterion_reduction = build_tensordictmodule(config.criterion_reduction)
+        criterion_function = build_tensordictsequential(config.criterion.function)
+        criterion_reduction = build_tensordictsequential(config.criterion.reduction)
 
         val_pre_metric_postprocessing = build_tensordictsequential(config.metric.val.pre_metric_postprocessing)
         val_metrics = build_metric_collection(config=config.metric.val.metric, stage=RunningStage.VALIDATING)
@@ -90,7 +90,7 @@ class Model(LightningModule):
             # model
             model=model,
             # criterion
-            criterion=criterion,
+            criterion_function=criterion_function,
             criterion_reduction=criterion_reduction,
             # metrics and postprocessing
             val_pre_metric_postprocessing=val_pre_metric_postprocessing,
@@ -120,11 +120,9 @@ class Model(LightningModule):
         with torch.no_grad():
             batch = self.augmentation(batch)
         batch = self(batch)
-        batch = self.criterion(batch)
+        batch = self.criterion_function(batch)
         loss: Tensor = self.criterion_reduction(batch)['loss']
-
         self.log(name=f'{RunningStage.TRAINING.value}_loss', value=loss) # FIXME:
-
         return loss
 
     def _eval_step(
@@ -136,7 +134,7 @@ class Model(LightningModule):
         """
         """
         batch = self(batch)
-        batch = self.criterion(batch)
+        batch = self.criterion_function(batch)
         batch = self.postprocessing(batch)
         batch = pre_metric_postprocessing(batch)
         metric_collection.update(batch)
@@ -163,10 +161,9 @@ class Model(LightningModule):
 
     def track(self, name: str, value: Any) -> None:
         if not isinstance(self.logger, AimLogger):
+            # TODO: raise warning
             return
-
         name, context = self.logger.parse_context(name)
-
         self.logger.experiment.track(
             value=value,
             name=name,

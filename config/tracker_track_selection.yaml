@@ -16,7 +16,6 @@ defaults:
   - metric: default
 
   - criterion: bce
-  - criterion_reduction: masked_mean
 
   - optimizer: adamw
   - lr_scheduler: plateau

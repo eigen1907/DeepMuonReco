@@ -38,6 +38,7 @@ def normalize_keys(
 def build_tensordictmodule(
     config: DictConfig,
     instantiation: bool = True,
+    **kwargs,
 ) -> TensorDictModule:
     """
     """
@@ -47,6 +48,7 @@ def build_tensordictmodule(
 
     in_keys = normalize_keys(config['in_keys'])
     out_keys = normalize_keys(config['out_keys'])
+
     inplace = config.get('inplace', True)
 
     _logger.debug(f'Building TensorDictModule with config: {config}')
@@ -68,18 +70,35 @@ def build_tensordictsequential(
         _logger.debug(f'Instantiating config: {config}')
         config = instantiate(config)
 
+    inplace = config.get('inplace', None)
+
+    # modules
     modules = OrderedDict()
     for each in config.modules:
         name = each['name']
         try:
+            # if inplace is False at the top level, propagate to children
+            if inplace is False:
+                each.inplace = inplace
+
             modules[name] = build_tensordictmodule(each)
         except Exception as error:
             raise ValueError(f"Error building module {name}: {error}") from error
 
+    # other args
+    partial_tolerant = config.get('partial_tolerant', False)
+
     selected_out_keys = config.get('selected_out_keys', None)
     if selected_out_keys is not None:
         selected_out_keys = list(selected_out_keys)
-    return TensorDictSequential(modules, selected_out_keys=selected_out_keys)
+
+
+    return TensorDictSequential(
+        modules,
+        partial_tolerant=partial_tolerant,
+        selected_out_keys=selected_out_keys,
+        inplace=inplace,
+    )
 
 
 def build_metric_collection(
