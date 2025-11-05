@@ -38,6 +38,5 @@ in_keys:
   - gem_hit_prep
   - [masks, gem_hit]
 
-
 out_keys:
   - logits
