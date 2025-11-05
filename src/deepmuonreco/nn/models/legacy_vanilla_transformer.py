@@ -1,3 +1,4 @@
+import warnings
 import torch
 import torch.nn as nn
 from torch import Tensor
@@ -5,23 +6,18 @@ from ..utils import make_cross_attn_mask, make_self_attn_mask
 
 
 __all__ = [
-    'VanillaTransformerModel',
+    'LegacyVanillaTransformerModel',
 ]
 
 
-class VanillaTransformerModel(nn.Module):
+class LegacyVanillaTransformerModel(nn.Module):
 
     def __init__(
         self,
-        # input dimensions
-        tracker_track_dim: int,
-        dt_segment_dim: int,
-        csc_segment_dim: int,
-        rpc_hit_dim: int,
-        gem_hit_dim: int,
-        # output dimensions
+        track_dim: int,
+        segment_dim: int,
+        hit_dim: int,
         output_dim: int,
-        # model hyperparameters
         model_dim: int = 64,
         feedforward_dim: int = 128,
         activation: str = 'relu',
@@ -29,18 +25,37 @@ class VanillaTransformerModel(nn.Module):
         num_layers: int = 1,
         dropout: float = 0.1,
     ) -> None:
+        """
+        """
+        warnings.warn(
+            message=(
+                "LegacyVanillaTransformerModel is deprecated and will be removed in future releases. "
+                "Please use the updated VanillaTransformerModel instead."
+            ),
+            category=DeprecationWarning,
+        )
+
         super().__init__()
 
         self.num_heads = num_heads
 
-        # tracker track: tt
-        self.tracker_track_embedder = nn.Linear(in_features=tracker_track_dim, out_features=model_dim)
+        # Track embedding (px, py, eta)
+        self.track_embedder = nn.Linear(
+            in_features=track_dim,
+            out_features=model_dim,
+        )
 
-        # muon detector measurements: mdm
-        self.dt_segment_embedder = nn.Linear(in_features=dt_segment_dim, out_features=model_dim)
-        self.csc_segment_embedder = nn.Linear(in_features=csc_segment_dim, out_features=model_dim)
-        self.rpc_hit_embedder = nn.Linear(in_features=rpc_hit_dim, out_features=model_dim)
-        self.gem_hit_embedder = nn.Linear(in_features=gem_hit_dim, out_features=model_dim)
+        # DT/CSC segment embedding (position + direction; dimension: 6)
+        self.segment_embedder = nn.Linear(
+            in_features=segment_dim,
+            out_features=model_dim,
+        )
+
+        # RPC/GEM rechit embedding (position only; dimension: 3)
+        self.rechit_embedder = nn.Linear(
+            in_features=hit_dim,
+            out_features=model_dim,
+        )
 
         layer = nn.TransformerDecoderLayer(
             d_model=model_dim,
@@ -91,40 +106,30 @@ class VanillaTransformerModel(nn.Module):
         Returns:
             logits: (N, L_trk)
         """
-        # NOTE: projection
-        tracker_track_embed = self.tracker_track_embedder(tracker_track)
-        dt_segment_embed = self.dt_segment_embedder(dt_segment)
-        csc_segment_embed = self.csc_segment_embedder(csc_segment)
-        rpc_hit_embed = self.rpc_hit_embedder(rpc_hit)
-        gem_hit_embed = self.gem_hit_embedder(gem_hit)
+        if (dt_segment.size(2) != csc_segment.size(2)) or (rpc_hit.size(2) != gem_hit.size(2)):
+            raise ValueError("Segment and rechit feature dimensions must match respectively.")
 
-        # NOTE: muon detector system measurement encoding
+        segment = torch.cat([dt_segment, csc_segment], dim=1)
+        segment_data_mask = torch.cat([dt_segment_data_mask, csc_segment_data_mask], dim=1)
+        rechit = torch.cat([rpc_hit, gem_hit], dim=1)
+        rechit_data_mask = torch.cat([rpc_hit_data_mask, gem_hit_data_mask], dim=1)
 
-        # Combine muon detector measurements
-        # embed: (N, L_muon_det, D_model)
-        # where L_muon_det = L_dt_seg + L_csc_seg + L_rpc_hit + L_gem_hit
-        muon_det_embed = torch.cat(
-            tensors=[
-                dt_segment_embed,
-                csc_segment_embed,
-                rpc_hit_embed,
-                gem_hit_embed,
-            ],
-            dim=1, # along sequence length dimension
-        )
-
-        muon_det_data_mask = torch.cat(
-            tensors=[
-                dt_segment_data_mask,
-                csc_segment_data_mask,
-                rpc_hit_data_mask,
-                gem_hit_data_mask,
-            ],
-            dim=1 # along sequence length dimension
-        )
-
+        # invert data mask to get pad mask
         tracker_track_pad_mask = ~tracker_track_data_mask
-        muon_det_pad_mask = ~muon_det_data_mask
+        segment_pad_mask = ~segment_data_mask
+        rechit_pad_mask = ~rechit_data_mask
+
+        # embed track features: (N, L_trk, D_model)
+        track_embed = self.track_embedder(tracker_track)
+        # embed segment features (DT/CSC): (N, L_seg, D_model)
+        segment_embed = self.segment_embedder(segment)
+        # embed rechit features (RPC/GEM): (N, L_rec, D_model)
+        rechit_embed = self.rechit_embedder(rechit)
+        # concatenate segment and rechit dimension -> memory tensor
+        # embed: (N, L_seg + L_rec, D_model)
+        memory_embed = torch.cat([segment_embed, rechit_embed], dim=1)
+        # memory pad_mask: (N, L_seg + L_rec)
+        memory_pad_mask = torch.cat([segment_pad_mask, rechit_pad_mask], dim=1)
 
         # compute self-attention mask for track features (target)
         tgt_mask = make_self_attn_mask(
@@ -133,19 +138,19 @@ class VanillaTransformerModel(nn.Module):
         )
 
         # compute cross-attention mask between track (target) and combined memory
-        muon_det_mask = make_cross_attn_mask(
-            source_pad_mask=muon_det_pad_mask,
+        memory_mask = make_cross_attn_mask(
+            source_pad_mask=memory_pad_mask,
             target_pad_mask=tracker_track_pad_mask,
             num_heads=self.num_heads,
         )
 
         # Transformer decoder: track_embed attends to memory_embed (DT/CSC segment + RPC/GEM rechit)
         latent = self.backbone(
-            tgt=tracker_track_embed,
-            memory=muon_det_embed,
+            tgt=track_embed,
+            memory=memory_embed,
             tgt_mask=tgt_mask,
-            memory_mask=muon_det_mask,
-            memory_key_padding_mask=muon_det_pad_mask,
+            memory_mask=memory_mask,
+            memory_key_padding_mask=memory_pad_mask,
             tgt_key_padding_mask=tracker_track_pad_mask,
             tgt_is_causal=False,
             memory_is_causal=False,

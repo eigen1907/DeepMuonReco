@@ -7,20 +7,16 @@ dropout: 0.1
 
 # input/output dimensions
 tracker_track_dim: ${eval:'len(${feature_set.tracker_track})'}
-dt_segment_dim: ${eval:'len(${feature_set.dt_segment})'}
-csc_segment_dim: ${eval:'len(${feature_set.csc_segment})'}
-rpc_hit_dim: ${eval:'len(${feature_set.rpc_hit})'}
-gem_hit_dim: ${eval:'len(${feature_set.gem_hit})'}
+segment_dim: ${eval:'len(${feature_set.dt_segment})'}
+hit_dim: ${eval:'len(${feature_set.rpc_hit})'}
 output_dim: ${exp.target_dim}
 
 module:
-  _target_: deepmuonreco.nn.VanillaTransformerModel
+  _target_: deepmuonreco.nn.LegacyVanillaTransformerModel
 
-  tracker_track_dim: ${..tracker_track_dim}
-  dt_segment_dim: ${..dt_segment_dim}
-  csc_segment_dim: ${..csc_segment_dim}
-  rpc_hit_dim: ${..rpc_hit_dim}
-  gem_hit_dim: ${..gem_hit_dim}
+  track_dim: ${..tracker_track_dim}
+  segment_dim: ${..segment_dim}
+  hit_dim: ${..hit_dim}
   output_dim: ${..output_dim}
 
   model_dim: ${..model_dim} # Dimension of the model embeddings
@@ -41,6 +37,7 @@ in_keys:
   - [masks, rpc_hit]
   - gem_hit_prep
   - [masks, gem_hit]
+
 
 out_keys:
   - logits
