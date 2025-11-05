@@ -38,7 +38,6 @@ def normalize_keys(
 def build_tensordictmodule(
     config: DictConfig,
     instantiation: bool = True,
-    **kwargs,
 ) -> TensorDictModule:
     """
     """
