@@ -107,7 +107,12 @@ class LegacyVanillaTransformerModel(nn.Module):
             logits: (N, L_trk)
         """
         if (dt_segment.size(2) != csc_segment.size(2)) or (rpc_hit.size(2) != gem_hit.size(2)):
-            raise ValueError("Segment and rechit feature dimensions must match respectively.")
+            raise ValueError(
+                f"Feature dimension mismatch: "
+                f"DT segment dim = {dt_segment.size(2)}, CSC segment dim = {csc_segment.size(2)}; "
+                f"RPC hit dim = {rpc_hit.size(2)}, GEM hit dim = {gem_hit.size(2)}. "
+                "DT and CSC segment feature dimensions must match, and RPC and GEM hit feature dimensions must match."
+            )
 
         segment = torch.cat([dt_segment, csc_segment], dim=1)
         segment_data_mask = torch.cat([dt_segment_data_mask, csc_segment_data_mask], dim=1)
