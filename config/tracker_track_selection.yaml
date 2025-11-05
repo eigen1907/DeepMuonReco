@@ -5,6 +5,7 @@ defaults:
 
   - exp: tracker_track_selection
   - paths: default
+
   - datamodule: default
   - feature_set: pqv
 
@@ -13,12 +14,12 @@ defaults:
   - model: latent_attention
   - postprocessing: default
 
-  - metric: default
-
   - criterion: bce
 
   - optimizer: adamw
   - lr_scheduler: plateau
+
+  - metric: default
 
   - trainer: gpu_16-mixed
   - callbacks: default
