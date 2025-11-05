@@ -9,6 +9,7 @@ from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 from tensordict import TensorDict
 from lightning.pytorch import LightningModule
 from lightning.pytorch.trainer.states import RunningStage
+from lightning_utilities.core.rank_zero import rank_zero_info
 from torchmetrics import MetricCollection
 from tensordict.nn import TensorDictModule, TensorDictSequential
 from torchmetrics import MetricCollection
@@ -226,7 +227,10 @@ class Model(LightningModule):
         scheduler_kwargs: dict[str, Any] = {}
 
         if scheduler_partial.func is CosineAnnealingWarmRestarts:
-            num_batches = self.trainer.estimated_stepping_batches
+            if self.trainer.train_dataloader is None:
+                rank_zero_info("Loading `train_dataloader` to estimate number of stepping batches.")
+                self.trainer.fit_loop.setup_data()
+            num_batches = self.trainer.num_training_batches
             _logger.info(f'Using estimated stepping batches of {num_batches} for CosineAnnealingWarmRestarts')
             scheduler_kwargs['T_0'] = int(config.t0 * num_batches)
 
