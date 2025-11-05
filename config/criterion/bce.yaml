@@ -1,12 +1,29 @@
-module:
-  _target_: torch.nn.BCEWithLogitsLoss
-  pos_weight:
-    _target_: torch.Tensor
-    data:
-      - ${exp.pos_weight}
-  reduction: none
-in_keys:
-  - logits
-  - target
-out_keys:
-  - loss
+function:
+
+  modules:
+    - name: bce
+      module:
+        _target_: torch.nn.BCEWithLogitsLoss
+        pos_weight:
+          _target_: torch.Tensor
+          data:
+            - ${exp.pos_weight}
+        reduction: none
+      in_keys:
+        - logits # (N, L_trk_max)
+        - target # (N, L_trk_max)
+      out_keys:
+        - loss # (N, L_trk_max)
+
+reduction:
+  inplace: false
+
+  modules:
+    - name: mean
+      module:
+        _target_: deepmuonreco.nn.MaskedMean
+      in_keys:
+        - [masks, tracker_track] # mask
+        - loss # input
+      out_keys:
+        - loss

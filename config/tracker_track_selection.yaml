@@ -5,27 +5,27 @@ defaults:
 
   - exp: tracker_track_selection
   - paths: default
-  - data: default # define datamodule, which builds datasets, dataloaders, and samplers
-  - feature_set: pqv # feature set
+
+  - datamodule: default
+  - feature_set: pqv
 
   - augmentation: none
-  - preprocessing: tracker_track_log_minmax # signed log1p for track
+  - preprocessing: tracker-track-log_minmax
   - model: latent_attention
   - postprocessing: default
 
-  - metric: default
-
   - criterion: bce
-  - criterion_reduction: masked_mean
 
   - optimizer: adamw
   - lr_scheduler: plateau
+
+  - metric: default
 
   - trainer: gpu_16-mixed
   - callbacks: default
   - logger: aim
 
-  - misc: default
+  - run: default
 
   - torch: default
   - hydra: default

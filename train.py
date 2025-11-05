@@ -58,8 +58,7 @@ def main(config: DictConfig):
     torch.set_num_interop_threads(config.torch.num_interop_threads)
     torch.set_float32_matmul_precision(precision=config.torch.float32_matmul_precision)
 
-    if config.seed:
-        seed_everything(config.seed, workers=True)
+    seed_everything(seed=config.run.seed, workers=True)
 
     model = Model.from_config(config=config)
     _logger.debug(f'{model=}')
@@ -76,10 +75,10 @@ def main(config: DictConfig):
         callbacks=list(callback_dict.values()),
         logger=logger,
     )
-    datamodule: LightningDataModule = instantiate(config.data)
+    datamodule: LightningDataModule = instantiate(config.datamodule)
 
     if isinstance(logger, AimLogger):
-        logger.experiment.name = config.run_name
+        logger.experiment.name = config.run.name
 
         logger.experiment.set(
             key='config',
@@ -99,7 +98,7 @@ def main(config: DictConfig):
                 'num_params': model.num_params,
             }
         )
-        for tag in config.tags:
+        for tag in config.run.tags:
             logger.experiment.add_tag(tag)
 
         description_file = output_dir / 'description.txt'
@@ -109,34 +108,31 @@ def main(config: DictConfig):
                 description = stream.read()
             _logger.info(f'{description=}')
             logger.experiment.description = description
-        elif description := config.get('description', None):
+        elif description := config.run.description:
             logger.experiment.description = description
 
-
-    if config.pre_fit_validation:
+    if config.run.pre_fit_validation:
+        # `validate` phase is supposed be run with the partial or full validation dataset
         trainer.validate(model=model, datamodule=datamodule)
-
-    trainer.fit(model=model, datamodule=datamodule)
-
-    # NOTE: `test` phase is supposed be run with the validation dataset
-    test_output = trainer.test(model=model, datamodule=datamodule, ckpt_path='best')
-
-    if config.predict:
-        trainer.predict(model=model, datamodule=datamodule, ckpt_path='best')
-
-    if objective_name := config.get('optuna_objective', None):
-        if len(test_output) != 1:
-            _logger.warning(
-                f'Expected a single metric dict, got {len(test_output)}: {test_output}'
-            )
-        metric_dict: dict = test_output[0]
-
-        _logger.info(f'Setting optuna objective: {objective_name}')
-        objective = metric_dict[objective_name]
     else:
-        objective = None
+        _logger.info(f'Skipping pre-fit validation as per {config.run.pre_fit_validation=}')
 
-    return objective
+    if config.run.fit:
+        trainer.fit(model=model, datamodule=datamodule)
+    else:
+        _logger.info(f'Skipping training as per {config.run.fit=}')
+
+    if config.run.test:
+        # `test` phase is supposed be run with the full validation dataset
+        trainer.test(model=model, datamodule=datamodule, ckpt_path='best')
+    else:
+        _logger.info(f'Skipping testing as per {config.run.test=}')
+
+    if config.run.predict:
+        # `predict` phase is supposed be run with the full test dataset
+        trainer.predict(model=model, datamodule=datamodule, ckpt_path='best')
+    else:
+        _logger.info(f'Skipping predicting as per {config.run.predict=}')
 
 
 
