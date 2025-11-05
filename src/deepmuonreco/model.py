@@ -12,7 +12,6 @@ from lightning.pytorch.trainer.states import RunningStage
 from lightning_utilities.core.rank_zero import rank_zero_info
 from torchmetrics import MetricCollection
 from tensordict.nn import TensorDictModule, TensorDictSequential
-from torchmetrics import MetricCollection
 from omegaconf import DictConfig
 from aim.pytorch_lightning import AimLogger
 from aim.storage.object import CustomObject
