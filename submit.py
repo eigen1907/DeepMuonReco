@@ -82,7 +82,7 @@ def run(
     print(f'{executable_file_path=}')
 
     exp_name = make_exp_name(config_file, **kwargs)
-    run_name = make_run_name(run_name) # FIXME:
+    run_name = make_run_name(run_name)
 
     # NOTE: arguments
     arg_list = [
