@@ -33,11 +33,11 @@ def make_exp_name(config_file: Path, **kwargs) -> str:
         exp_name = exp_config['name']
     return exp_name
 
+
 def make_run_name(run_name: str | None) -> str:
     run_name = run_name or generate_slug(pattern=2)
     now = datetime.now().strftime('%y%m%d-%H%M%S')
     return f'{now}_{run_name}'
-
 
 
 def run(
@@ -48,7 +48,7 @@ def run(
     cpus: int,
     node_list: list[str],
     run_name: str | None = None,
-    description: str | None = None,
+    run_description: str | None = None,
     **kwargs,
 ) -> None:
     """
@@ -82,7 +82,7 @@ def run(
     print(f'{executable_file_path=}')
 
     exp_name = make_exp_name(config_file, **kwargs)
-    run_name = make_run_name(run_name)
+    run_name = make_run_name(run_name) # FIXME:
 
     # NOTE: arguments
     arg_list = [
@@ -97,9 +97,9 @@ def run(
 
     arg_list += [
         f'exp.name={exp_name}',
-        f'run_name={run_name}',
+        f'run.name={run_name}',
         f'trainer.devices={gpus}',
-        f'data.num_workers={cpus - 1}', # FIXME:
+        f'datamodule.num_workers={cpus - 1}', # FIXME:
     ]
 
     if extra_args is not None:
@@ -113,12 +113,10 @@ def run(
     condor_log_dir.mkdir(parents=True, exist_ok=True)
     condor_log_path = condor_log_dir / 'condor'
 
-    if description is not None:
-        # FIXME: write description to a file because I don't know how to pass
-        # double quoted strings to HTCondor as arguments
+    if run_description is not None:
         description_file_path = condor_log_dir / 'description.txt'
         with open(description_file_path, 'w') as stream:
-            stream.write(description)
+            stream.write(run_description)
 
     job_batch_name = f'{PROJECT_NAME}.{exp_name}'
 
@@ -188,8 +186,8 @@ def main():
     # TODO: when gpus > 1, update config_file
     parser.add_argument('--gpus', type=int, default=1, help='the number of GPUs')
     parser.add_argument('--cpus', type=int, default=3, help='the number of CPUs')
-    parser.add_argument('-r', '--run-name', type=str)
-    parser.add_argument('-d', '--description', type=str, help='description of the run')
+    parser.add_argument('-n', '--run-name', type=str, help='name of the run')
+    parser.add_argument('-d', '--run-description', type=str, help='description of the run')
     parser.add_argument('--node', dest='node_list', type=str, nargs='+', default=['gpu01', 'gpu02', 'gpu03'])
     args = parser.parse_args()
 
