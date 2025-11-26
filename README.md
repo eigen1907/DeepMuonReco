@@ -39,7 +39,7 @@ For example:
 ```
 
 ```bash
-./submit.py --model latent_attention -a 'model.latent_attention.model_dim 128 optimizer.lr 0.0001 datamodule.batch_size 256'
+./submit.py --model latent_attention -a 'model.model_dim 128 optimizer.lr 0.0001 datamodule.batch_size 256'
 ```
 
 ### Monitor training logs with Aim UI
