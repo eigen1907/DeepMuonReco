@@ -26,7 +26,7 @@ To run a training job with a sanity-check config on your local machine, use the 
 After the sanity check passes without any errors, you can start training the model by specifying your desired configurations in the prompt.
 For example:
 ```bash
-./train.py model=latent_attention model.latent_attention.model_dim=128 optimizer.lr=0.0001 datamodule.batch_size=256
+./train.py model=latent_attention model.model_dim=128 optimizer.lr=0.0001 datamodule.batch_size=256
 ```
 
 ### Submit training job into a cluster
@@ -39,7 +39,7 @@ For example:
 ```
 
 ```bash
-./submit.py --model latent_attention -a 'model.latent_attention.model_dim 128 optimizer.lr 0.0001 datamodule.batch_size 256'
+./submit.py --model latent_attention -a 'model.model_dim=128 optimizer.lr=0.0001 datamodule.batch_size=256'
 ```
 
 ### Monitor training logs with Aim UI
