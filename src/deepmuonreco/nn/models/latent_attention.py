@@ -22,8 +22,8 @@ class LatentAttentionModel(nn.Module):
         tracker_track_dim: int,
         dt_segment_dim: int,
         csc_segment_dim: int,
-        rpc_hit_dim: int,
-        gem_hit_dim: int,
+        rpc_hit_dim: int | None,
+        gem_hit_dim: int | None,
         # output dimensions
         output_dim: int,
         # model hyperparameters
@@ -50,8 +50,8 @@ class LatentAttentionModel(nn.Module):
         # muon detector measurements: mdm
         self.dt_segment_embedder = nn.Linear(in_features=dt_segment_dim, out_features=model_dim)
         self.csc_segment_embedder = nn.Linear(in_features=csc_segment_dim, out_features=model_dim)
-        self.rpc_hit_embedder = nn.Linear(in_features=rpc_hit_dim, out_features=model_dim)
-        self.gem_hit_embedder = nn.Linear(in_features=gem_hit_dim, out_features=model_dim)
+        self.rpc_hit_embedder = nn.Linear(in_features=rpc_hit_dim, out_features=model_dim) if rpc_hit_dim is not None else nn.Identity()
+        self.gem_hit_embedder = nn.Linear(in_features=gem_hit_dim, out_features=model_dim) if gem_hit_dim is not None else nn.Identity()
 
         self.tracker_track_encoder = PerceiverEncoder(
             latent_len=track_latent_len,
@@ -114,10 +114,10 @@ class LatentAttentionModel(nn.Module):
         dt_segment_data_mask: Tensor,
         csc_segment: Tensor,
         csc_segment_data_mask: Tensor,
-        rpc_hit: Tensor,
-        rpc_hit_data_mask: Tensor,
-        gem_hit: Tensor,
-        gem_hit_data_mask: Tensor,
+        rpc_hit: Tensor | None = None,
+        rpc_hit_data_mask: Tensor | None = None,
+        gem_hit: Tensor | None = None,
+        gem_hit_data_mask: Tensor | None = None,
     ) -> Tensor:
         """
         Args:
@@ -135,33 +135,30 @@ class LatentAttentionModel(nn.Module):
         tracker_track_embed = self.tracker_track_embedder(tracker_track)
         dt_segment_embed = self.dt_segment_embedder(dt_segment)
         csc_segment_embed = self.csc_segment_embedder(csc_segment)
-        rpc_hit_embed = self.rpc_hit_embedder(rpc_hit)
-        gem_hit_embed = self.gem_hit_embedder(gem_hit)
+        rpc_hit_embed = self.rpc_hit_embedder(rpc_hit) if rpc_hit is not None else None
+        gem_hit_embed = self.gem_hit_embedder(gem_hit) if gem_hit is not None else None
 
         # NOTE: muon detector system measurement encoding
 
         # Combine muon detector measurements
         # embed: (N, L_muon_det, D_model)
         # where L_muon_det = L_dt_seg + L_csc_seg + L_rpc_hit + L_gem_hit
-        muon_det_embed = torch.cat(
-            tensors=[
-                dt_segment_embed,
-                csc_segment_embed,
-                rpc_hit_embed,
-                gem_hit_embed,
-            ],
-            dim=1, # along sequence length dimension
-        )
+        muon_det_embed = [dt_segment_embed, csc_segment_embed]
+        muon_det_data_mask = [dt_segment_data_mask, csc_segment_data_mask]
 
-        muon_det_data_mask = torch.cat(
-            tensors=[
-                dt_segment_data_mask,
-                csc_segment_data_mask,
-                rpc_hit_data_mask,
-                gem_hit_data_mask,
-            ],
-            dim=1 # along sequence length dimension
-        )
+        if rpc_hit_embed is not None:
+            muon_det_embed.append(rpc_hit_embed)
+            if rpc_hit_data_mask is not None:
+                muon_det_data_mask.append(rpc_hit_data_mask)
+
+        if gem_hit_embed is not None:
+            muon_det_embed.append(gem_hit_embed)
+            if gem_hit_data_mask is not None:
+                muon_det_data_mask.append(gem_hit_data_mask)
+
+        # concatenate tensors along sequence length dimension
+        muon_det_embed = torch.cat(tensors=muon_det_embed, dim=1)
+        muon_det_data_mask = torch.cat(tensors=muon_det_data_mask, dim=1)
 
         # NOTE: muonn detector measurement encoding
         muon_det_latent = self.muon_det_encoder(

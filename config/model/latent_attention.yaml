@@ -40,16 +40,28 @@ module:
   dropout_p: ${..dropout_p}
 
 in_keys:
-  - tracker_track_prep
-  - [masks, tracker_track]
-  - dt_segment_prep
-  - [masks, dt_segment]
-  - csc_segment_prep
-  - [masks, csc_segment]
-  - rpc_hit_prep
-  - [masks, rpc_hit]
-  - gem_hit_prep
-  - [masks, gem_hit]
+    tracker_track_prep: tracker_track
+    tracker_track_data_mask: tracker_track_data_mask
+    dt_segment_prep: dt_segment
+    dt_segment_data_mask: dt_segment_data_mask
+    csc_segment_prep: csc_segment
+    csc_segment_data_mask: csc_segment_data_mask
+    rpc_hit_prep: rpc_hit
+    rpc_hit_data_mask: rpc_hit_data_mask
+    gem_hit_prep: gem_hit
+    gem_hit_data_mask: gem_hit_data_mask
+
+
+  # - tracker_track_prep
+  # - [masks, tracker_track]
+  # - dt_segment_prep
+  # - [masks, dt_segment]
+  # - csc_segment_prep
+  # - [masks, csc_segment]
+  # - rpc_hit_prep
+  # - [masks, rpc_hit]
+  # - gem_hit_prep
+  # - [masks, gem_hit]
 
 out_keys:
   - logits # binary classification logits
