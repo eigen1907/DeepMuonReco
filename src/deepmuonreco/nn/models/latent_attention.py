@@ -50,8 +50,8 @@ class LatentAttentionModel(nn.Module):
         # muon detector measurements: mdm
         self.dt_segment_embedder = nn.Linear(in_features=dt_segment_dim, out_features=model_dim)
         self.csc_segment_embedder = nn.Linear(in_features=csc_segment_dim, out_features=model_dim)
-        self.rpc_hit_embedder = nn.Linear(in_features=rpc_hit_dim, out_features=model_dim) if rpc_hit_dim is not None else nn.Identity()
-        self.gem_hit_embedder = nn.Linear(in_features=gem_hit_dim, out_features=model_dim) if gem_hit_dim is not None else nn.Identity()
+        self.rpc_hit_embedder = nn.Linear(in_features=rpc_hit_dim, out_features=model_dim) if rpc_hit_dim is not None else None
+        self.gem_hit_embedder = nn.Linear(in_features=gem_hit_dim, out_features=model_dim) if gem_hit_dim is not None else None
 
         self.tracker_track_encoder = PerceiverEncoder(
             latent_len=track_latent_len,
