@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from logging import getLogger
+import copy
 from tensordict.nn import TensorDictModule, TensorDictSequential
 from omegaconf import DictConfig, ListConfig
 from hydra.utils import instantiate
@@ -18,20 +19,22 @@ __all__ = [
 ]
 
 
-
 def normalize_keys(
-    keys: list[str | list[str]],
-) -> list[str | tuple[str, ...]]:
+    keys: list[str | list[str]] | dict[str, str],
+) -> list[str | tuple[str, ...]] | dict[str, str]:
     """
     """
-    output: list[str | tuple[str, ...]] = []
-    for each in keys:
-        if isinstance(each, str):
-            output.append(each)
-        elif isinstance(each, (list, ListConfig)):
-            output.append(tuple(each))
-        else:
-            raise ValueError(f'{type(each)=}')
+    if isinstance(keys, dict):
+        output = copy.deepcopy(keys)
+    else:
+        output = []
+        for each in keys:
+            if isinstance(each, str):
+                output.append(each)
+            elif isinstance(each, (list, ListConfig)):
+                output.append(tuple(each))
+            else:
+                raise ValueError(f'{type(each)=}')
     return output
 
 
@@ -50,7 +53,7 @@ def build_tensordictmodule(
 
     inplace = config.get('inplace', True)
 
-    _logger.debug(f'Building TensorDictModule with config: {config}')
+    _logger.debug(f'Building TensorDictModule with {config=}, {in_keys=}, {out_keys=}, {inplace=}')
     return TensorDictModule(
         module=config['module'],
         in_keys=in_keys,
