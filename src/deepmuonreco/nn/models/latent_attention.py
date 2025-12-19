@@ -160,7 +160,7 @@ class LatentAttentionModel(nn.Module):
         muon_det_embed = torch.cat(tensors=muon_det_embed, dim=1)
         muon_det_data_mask = torch.cat(tensors=muon_det_data_mask, dim=1)
 
-        # NOTE: muonn detector measurement encoding
+        # NOTE: muon detector measurement encoding
         muon_det_latent = self.muon_det_encoder(
             input=muon_det_embed,
             data_mask=muon_det_data_mask,
