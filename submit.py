@@ -15,23 +15,30 @@ from coolname import generate_slug
 PROJECT_NAME = 'deepmuonreco'
 
 def make_exp_name(config_file: Path, **kwargs) -> str:
-    if exp_name := kwargs.get('exp', None):
-        if debug_name := kwargs.get('debug', None):
-            exp_name = debug_name
-    else:
-        with open(config_file, 'r') as file:
-            base_config = yaml.safe_load(file)
-            for each in base_config['defaults']:
-                if 'exp' in each:
-                    sub_config_name = each['exp']
-                    break
-            else:
-                raise ValueError(f'exp not found in {config_file}')
+    if debug_name_cli := kwargs.get('debug'):
+        return debug_name_cli
 
-        with open(config_file.parent / 'exp' / f'{sub_config_name}.yaml', 'r') as file:
-            exp_config = yaml.safe_load(file)
-        exp_name = exp_config['name']
-    return exp_name
+    if exp_name_cli := kwargs.get('exp'):
+        return exp_name_cli
+
+    with open(config_file, 'r') as file:
+        config = yaml.safe_load(file)
+    
+    if exp_name_config := config.get('exp', {}).get('name'):
+        return exp_name_config
+    
+    defaults = config.get('defaults', [])
+    
+    default_exp = next((item['exp'] for item in defaults if 'exp' in item), None)
+
+    if default_exp:
+        default_config_file = config_file.parent / 'exp' / f'{default_exp}.yaml'
+        with open(default_config_file, 'r') as file:
+            default_config = yaml.safe_load(file)
+            exp_name_default_config = default_config.get('name')
+        return exp_name_default_config
+
+    raise ValueError(f'Experiment name not found in {config_file}')
 
 
 def make_run_name(run_name: str | None) -> str:
@@ -62,24 +69,21 @@ def run(
 
     script_file_path = root_dir / 'train.py'
     if not script_file_path.exists():
-        raise FileNotFoundError(f'Executable not found: {script_file_path}')
-    print(f'{script_file_path=}')
+        raise FileNotFoundError(f'Script file not found: {script_file_path}')
 
     config_dir = root_dir / 'config'
     if not config_dir.exists():
         raise FileNotFoundError(f'Config directory not found: {config_dir}')
-    print(f'{config_dir=}')
 
-    config_file = config_dir / config_name
-    config_file = config_file.with_suffix('.yaml')
+    config_file = (config_dir / config_name).with_suffix('.yaml')
     if not config_file.exists():
         raise FileNotFoundError(f'Config file not found: {config_file}')
 
-    if executable_file_path := shutil.which('python'):
-        executable_file_path = Path(executable_file_path)
+    if executable := shutil.which('python'):
+        executable = Path(executable)
     else:
         raise FileNotFoundError('Python executable not found in PATH')
-    print(f'{executable_file_path=}')
+    print(f'{executable=}')
 
     exp_name = make_exp_name(config_file, **kwargs)
     run_name = make_run_name(run_name)
@@ -172,8 +176,7 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
-    parser.add_argument('-cn', '--config-name', type=str, default='tracker_track_selection', help='config name') # TODO: choices
-
+    parser.add_argument('-cn', '--config-name', type=str, default='tracker-track-selection', help='config name') # TODO: choices
     for sub_config_dir in config_dir.glob('*'):
         if not sub_config_dir.is_dir():
             continue
