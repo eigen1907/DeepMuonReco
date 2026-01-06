@@ -15,8 +15,8 @@ from coolname import generate_slug
 PROJECT_NAME = 'deepmuonreco'
 
 def make_exp_name(config_file: Path, **kwargs) -> str:
-    if debug_name_cli := kwargs.get('debug'):
-        return debug_name_cli
+    if 'debug' in kwargs:
+        return 'debug'
 
     if exp_name_cli := kwargs.get('exp'):
         return exp_name_cli
