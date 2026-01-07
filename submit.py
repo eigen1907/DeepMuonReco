@@ -15,20 +15,20 @@ from coolname import generate_slug
 PROJECT_NAME = 'deepmuonreco'
 
 def make_exp_name(config_file: Path, **kwargs) -> str:
-    if debug_name_cli := kwargs.get('debug'):
-        return debug_name_cli
+    if 'debug' in kwargs:
+        return 'debug'
 
     if exp_name_cli := kwargs.get('exp'):
         return exp_name_cli
 
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
-    
+
     if exp_name_config := config.get('exp', {}).get('name'):
         return exp_name_config
-    
+
     defaults = config.get('defaults', [])
-    
+
     default_exp = next((item['exp'] for item in defaults if 'exp' in item), None)
 
     if default_exp:
@@ -131,7 +131,7 @@ def run(
         'universe': 'vanilla',
         'getenv': 'True',
         # job
-        'executable': executable_file_path,
+        'executable': executable,
         'arguments': arguments,
         #
         'should_transfer_files': 'NO',
