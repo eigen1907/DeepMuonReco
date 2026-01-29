@@ -7,11 +7,12 @@ root: ${paths.data_dir}
 train_file: train.h5
 val_file: val.h5
 test_file: val.h5
-predict_file: null
+predict_file: val.h5
 
 tracker_track_feature_list: ${feature_set.tracker_track}
 dt_segment_feature_list: ${feature_set.dt_segment}
 csc_segment_feature_list: ${feature_set.csc_segment}
+gem_segment_feature_list: ${feature_set.gem_segment}
 rpc_hit_feature_list: ${feature_set.rpc_hit}
 gem_hit_feature_list: ${feature_set.gem_hit}
 

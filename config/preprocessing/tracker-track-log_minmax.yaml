@@ -42,8 +42,18 @@ modules:
     out_keys:
       - csc_segment_prep
 
-  # NOTE: rpc_hit
+  # NOTE: GEM segment:
+  - name: gem_seg_norm
+    module:
+      _target_: deepmuonreco.nn.Normalize
+      offset: ${feature_set.preprocessing.gem_segment.offset}
+      scale: ${feature_set.preprocessing.gem_segment.scale}
+    in_keys:
+      - gem_segment
+    out_keys:
+      - gem_segment_prep
 
+  # NOTE: RPC hit
   - name: rpc_hit_norm
     module:
       _target_: deepmuonreco.nn.Normalize
@@ -54,7 +64,7 @@ modules:
     out_keys:
       - rpc_hit_prep
 
-  # NOTE: gem_hit
+  # NOTE: GEM hit
   - name: gem_hit_norm
     module:
       _target_: deepmuonreco.nn.Normalize

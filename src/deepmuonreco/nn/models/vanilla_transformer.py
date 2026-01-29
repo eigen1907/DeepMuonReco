@@ -17,6 +17,7 @@ class VanillaTransformerModel(nn.Module):
         tracker_track_dim: int,
         dt_segment_dim: int,
         csc_segment_dim: int,
+        gem_segment_dim: int,
         rpc_hit_dim: int,
         gem_hit_dim: int,
         # output dimensions
@@ -39,6 +40,7 @@ class VanillaTransformerModel(nn.Module):
         # muon detector measurements: mdm
         self.dt_segment_embedder = nn.Linear(in_features=dt_segment_dim, out_features=model_dim)
         self.csc_segment_embedder = nn.Linear(in_features=csc_segment_dim, out_features=model_dim)
+        self.gem_segment_embedder = nn.Linear(in_features=gem_segment_dim, out_features=model_dim)
         self.rpc_hit_embedder = nn.Linear(in_features=rpc_hit_dim, out_features=model_dim)
         self.gem_hit_embedder = nn.Linear(in_features=gem_hit_dim, out_features=model_dim)
 
@@ -71,6 +73,8 @@ class VanillaTransformerModel(nn.Module):
         dt_segment_data_mask: Tensor,
         csc_segment: Tensor,
         csc_segment_data_mask: Tensor,
+        gem_segment: Tensor,
+        gem_segment_data_mask: Tensor,
         rpc_hit: Tensor,
         rpc_hit_data_mask: Tensor,
         gem_hit: Tensor,
@@ -84,6 +88,8 @@ class VanillaTransformerModel(nn.Module):
             dt_segment_data_mask: (N, L_dt_seg)
             csc_segment: (N, L_csc_seg, D_csc_seg)
             csc_segment_data_mask: (N, L_csc_seg)
+            gem_segment: (N, L_gem_seg, D_gem_seg)
+            gem_segment_data_mask: (N, L_gem_seg)
             rpc_hit: (N, L_rpc_rec, D_rpc_rec)
             rpc_hit_data_mask: (N, L_rpc_rec)
             gem_hit: (N, L_gem_rec, D_gem_rec)
@@ -95,6 +101,7 @@ class VanillaTransformerModel(nn.Module):
         tracker_track_embed = self.tracker_track_embedder(tracker_track)
         dt_segment_embed = self.dt_segment_embedder(dt_segment)
         csc_segment_embed = self.csc_segment_embedder(csc_segment)
+        gem_segment_embed = self.gem_segment_embedder(gem_segment)
         rpc_hit_embed = self.rpc_hit_embedder(rpc_hit)
         gem_hit_embed = self.gem_hit_embedder(gem_hit)
 
@@ -102,11 +109,12 @@ class VanillaTransformerModel(nn.Module):
 
         # Combine muon detector measurements
         # embed: (N, L_muon_det, D_model)
-        # where L_muon_det = L_dt_seg + L_csc_seg + L_rpc_hit + L_gem_hit
+        # where L_muon_det = L_dt_seg + L_csc_seg + L_gem_seg + L_rpc_hit + L_gem_hit
         muon_det_embed = torch.cat(
             tensors=[
                 dt_segment_embed,
                 csc_segment_embed,
+                gem_segment_embed,
                 rpc_hit_embed,
                 gem_hit_embed,
             ],
@@ -117,6 +125,7 @@ class VanillaTransformerModel(nn.Module):
             tensors=[
                 dt_segment_data_mask,
                 csc_segment_data_mask,
+                gem_segment_data_mask,
                 rpc_hit_data_mask,
                 gem_hit_data_mask,
             ],
