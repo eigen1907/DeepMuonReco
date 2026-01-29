@@ -131,7 +131,7 @@ def run(
         'universe': 'vanilla',
         'getenv': 'True',
         # job
-        'executable': executable_file_path,
+        'executable': executable,
         'arguments': arguments,
         #
         'should_transfer_files': 'NO',
@@ -185,7 +185,7 @@ def main():
         parser.add_argument(f'--{name_flag}', type=str, help=f'{name_help} config dir')
 
     parser.add_argument('-a', '--extra-args', type=str, required=False, help='a list of yaml config files')
-    parser.add_argument('-m', '--memory', type=str, default='64GB', help='memory')
+    parser.add_argument('-m', '--memory', type=str, default='128GB', help='memory')
     # TODO: when gpus > 1, update config_file
     parser.add_argument('--gpus', type=int, default=1, help='the number of GPUs')
     parser.add_argument('--cpus', type=int, default=3, help='the number of CPUs')

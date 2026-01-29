@@ -30,3 +30,10 @@ defaults:
   - debug: null
 
   - _self_
+
+datamodule:
+  target_label: track_is_matched_muon
+
+exp:
+  name: tracker-track-selection_matched-muon
+  pos_weight: 3500.0

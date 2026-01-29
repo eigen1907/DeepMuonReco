@@ -13,6 +13,7 @@ dropout_p: 0.01
 tracker_track_dim: ${eval:'len(${feature_set.tracker_track})'}
 dt_segment_dim: ${eval:'len(${feature_set.dt_segment})'}
 csc_segment_dim: ${eval:'len(${feature_set.csc_segment})'}
+gem_segment_dim: ${eval:'len(${feature_set.gem_segment})'}
 rpc_hit_dim: ${eval:'len(${feature_set.rpc_hit})'}
 gem_hit_dim: ${eval:'len(${feature_set.gem_hit})'}
 output_dim: ${exp.target_dim}
@@ -24,6 +25,7 @@ module:
   tracker_track_dim: ${..tracker_track_dim}
   dt_segment_dim: ${..dt_segment_dim}
   csc_segment_dim: ${..csc_segment_dim}
+  gem_segment_dim: ${..gem_segment_dim}
   rpc_hit_dim: ${..rpc_hit_dim}
   gem_hit_dim: ${..gem_hit_dim}
   output_dim: ${..output_dim}
@@ -46,6 +48,8 @@ in_keys:
     dt_segment_data_mask: dt_segment_data_mask
     csc_segment_prep: csc_segment
     csc_segment_data_mask: csc_segment_data_mask
+    gem_segment_prep: gem_segment
+    gem_segment_data_mask: gem_segment_data_mask
     rpc_hit_prep: rpc_hit
     rpc_hit_data_mask: rpc_hit_data_mask
     gem_hit_prep: gem_hit
@@ -58,6 +62,8 @@ in_keys:
   # - [masks, dt_segment]
   # - csc_segment_prep
   # - [masks, csc_segment]
+  # - gem_segment_prep
+  # - [masks, gem_segment]
   # - rpc_hit_prep
   # - [masks, rpc_hit]
   # - gem_hit_prep

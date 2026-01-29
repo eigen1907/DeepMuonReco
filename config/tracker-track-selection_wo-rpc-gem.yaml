@@ -1,12 +1,11 @@
 # @package _global_
 
-
 defaults:
-  - exp: tracker_track_selection
+  - exp: tracker-track-selection
   - paths: default
 
-  - feature_set: pqv
   - datamodule: default
+  - feature_set: pqv
 
   - augmentation: none
   - preprocessing: tracker-track-log_minmax
@@ -33,8 +32,8 @@ defaults:
   - _self_
 
 feature_set:
-  rpc_hit: null
-  gem_hit: null
+  rpc_hit: null # RPC out
+  gem_hit: null # GEM out
 
 preprocessing:
   partial_tolerant: true

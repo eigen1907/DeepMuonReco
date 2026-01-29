@@ -1,12 +1,11 @@
 # @package _global_
 
-
 defaults:
-  - exp: tracker_track_selection
+  - exp: tracker-track-selection
   - paths: default
 
-  - feature_set: pqv
   - datamodule: default
+  - feature_set: pqv
 
   - augmentation: none
   - preprocessing: tracker-track-log_minmax

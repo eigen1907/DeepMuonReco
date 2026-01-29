@@ -25,16 +25,20 @@ class TrackerTrackSelectionDataset(Dataset):
         tracker_track_feature_list: list[str],
         dt_segment_feature_list: list[str],
         csc_segment_feature_list: list[str],
+        gem_segment_feature_list: list[str],
         rpc_hit_feature_list: list[str] | None,
         gem_hit_feature_list: list[str] | None,
         max_events: int | float | None = None,
+        target_label: str = 'track_is_trk_muon', 
     ) -> None:
         super().__init__()
 
         _logger.info(f"Loading data from {path} ...")
+        _logger.info(f"  - Target label: {target_label}")
         _logger.info(f"  - Tracker track features: {tracker_track_feature_list}")
         _logger.info(f"  - DT segment features: {dt_segment_feature_list}")
         _logger.info(f"  - CSC segment features: {csc_segment_feature_list}")
+        _logger.info(f"  - GEM segment features: {gem_segment_feature_list}")
         _logger.info(f"  - RPC hit features: {rpc_hit_feature_list}")
         _logger.info(f"  - GEM hit features: {gem_hit_feature_list}")
 
@@ -52,9 +56,11 @@ class TrackerTrackSelectionDataset(Dataset):
             tracker_track_feature_list=tracker_track_feature_list,
             dt_segment_feature_list=dt_segment_feature_list,
             csc_segment_feature_list=csc_segment_feature_list,
+            gem_segment_feature_list=gem_segment_feature_list,
             rpc_hit_feature_list=rpc_hit_feature_list,
             gem_hit_feature_list=gem_hit_feature_list,
             max_events=max_events,
+            target_label=target_label,
         )
 
     def __getitem__(self, index: int) -> TensorDict:
@@ -91,10 +97,12 @@ class TrackerTrackSelectionDataset(Dataset):
         tracker_track_feature_list: list[str],
         dt_segment_feature_list: list[str],
         csc_segment_feature_list: list[str],
+        gem_segment_feature_list: list[str],
         rpc_hit_feature_list: list[str] | None,
         gem_hit_feature_list: list[str] | None,
         max_events: int | float | None,
-        treepath: str = 'muons1stStep/event',
+        target_label: str,
+        treepath: str = 'deepMuonRecoNtuplizer/tree',
     ) -> list[TensorDict]:
         raise NotImplementedError("Root file loading is not implemented yet.")
 
@@ -106,8 +114,10 @@ class TrackerTrackSelectionDataset(Dataset):
         tracker_track_feature_list: list[str],
         dt_segment_feature_list: list[str],
         csc_segment_feature_list: list[str],
+        gem_segment_feature_list: list[str],
         rpc_hit_feature_list: list[str] | None,
         gem_hit_feature_list: list[str] | None,
+        target_label: str,
     ) -> list[TensorDict]:
         """
         For the HDF5 files, we assume that event cleaning has already been
@@ -133,7 +143,8 @@ class TrackerTrackSelectionDataset(Dataset):
                 for each in tracker_track_feature_list
             ]
 
-            # NOTE: reconstructed
+            # NOTE: reconstructed segments in the muon system
+            # prefix: 'dt_seg_', 'csc_seg_', ''gem_seg_'
             chunk['dt_segment'] = [
                 file[f'dt_seg_{each}'][:stop] # type: ignore
                 for each in dt_segment_feature_list
@@ -142,6 +153,11 @@ class TrackerTrackSelectionDataset(Dataset):
             chunk['csc_segment'] = [
                 file[f'csc_seg_{each}'][:stop] # type: ignore
                 for each in csc_segment_feature_list
+            ]
+            
+            chunk['gem_segment'] = [
+                file[f'gem_seg_{each}'][:stop] # type: ignore
+                for each in gem_segment_feature_list
             ]
 
             # NOTE: reconstructed hits in the muon system
@@ -157,13 +173,16 @@ class TrackerTrackSelectionDataset(Dataset):
                     for each in gem_hit_feature_list
                 ]
 
+            if target_label not in file:
+                valid_targets = [k for k in file.keys() if 'track_is' in k]
+                raise ValueError(f"Target '{target_label}' not found in HDF5 file. Available options might be: {valid_targets}")
+
             chunk['target'] = [
                 torch.from_numpy(each.astype(np.float32))
-                for each in file['is_tracker_muon'][:stop] # type: ignore
+                for each in file[target_label][:stop] # type: ignore
             ]
 
-
-        key_list_for_stack = ['tracker_track', 'dt_segment', 'csc_segment']
+        key_list_for_stack = ['tracker_track', 'dt_segment', 'csc_segment', 'gem_segment']
         if rpc_hit_feature_list is not None:
             key_list_for_stack.append('rpc_hit')
         if gem_hit_feature_list is not None:
@@ -185,6 +204,7 @@ class TrackerTrackSelectionDataset(Dataset):
         batch['tracker_track_data_mask'] = batch['masks']['tracker_track']
         batch['dt_segment_data_mask'] = batch['masks']['dt_segment']
         batch['csc_segment_data_mask'] = batch['masks']['csc_segment']
+        batch['gem_segment_data_mask'] = batch['masks']['gem_segment']
         if 'rpc_hit' in batch['masks']:
             batch['rpc_hit_data_mask'] = batch['masks']['rpc_hit']
         if 'gem_hit' in batch['masks']:
