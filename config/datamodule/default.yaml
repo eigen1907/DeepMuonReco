@@ -16,6 +16,8 @@ gem_segment_feature_list: ${feature_set.gem_segment}
 rpc_hit_feature_list: ${feature_set.rpc_hit}
 gem_hit_feature_list: ${feature_set.gem_hit}
 
+target_key: ${exp.target_key}
+
 batch_size: 128
 eval_batch_size: 128
 train_sampler: null
