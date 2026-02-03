@@ -27,8 +27,12 @@ class DataModule(LightningDataModule):
         tracker_track_feature_list: list[str],
         dt_segment_feature_list: list[str],
         csc_segment_feature_list: list[str],
+        gem_segment_feature_list: list[str] | None,
         rpc_hit_feature_list: list[str] | None,
         gem_hit_feature_list: list[str] | None,
+        #
+        target_key: str = 'track_is_trk_muon',
+        #
         train_file: str | None = None,
         val_file: str | None = None,
         test_file: str | None = None,
@@ -71,8 +75,10 @@ class DataModule(LightningDataModule):
             'tracker_track_feature_list',
             'dt_segment_feature_list',
             'csc_segment_feature_list',
+            'gem_segment_feature_list',
             'rpc_hit_feature_list',
             'gem_hit_feature_list',
+            'target_key',
         ]
         for key in key_list:
             kwargs[key] = self.hparams[key]

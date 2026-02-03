@@ -14,6 +14,11 @@ csc_segment: [
     'dir_x', 'dir_y', 'dir_z',
 ]
 
+gem_segment: [
+    'pos_x', 'pos_y', 'pos_z',
+    'dir_x', 'dir_y', 'dir_z',
+]
+
 rpc_hit: [
     'pos_x', 'pos_y', 'pos_z',
 ]
@@ -39,9 +44,9 @@ preprocessing:
       0
     ]
     std: [
-      0.692, 0.692, 1.779, # 1 std
-      0.274, 0.274, 1.411, # 1 std
-      1 # no scaling
+      0.4277, 0.4274, 1.5307,
+      0.0611, 0.0612, 1.4953,
+      1.0
     ]
 
     # FIXME:
@@ -52,21 +57,20 @@ preprocessing:
     ]
 
     scale: [
-      6.908, 6.908, 6.908, # log1p(1000)
-      5, 5, 7,
-      1,
+      8.072, 8.769, 10.882,
+      1.257, 2.938, 4.735,
+      1.0,
     ]
 
-
+  # Segments
+  # [pos_x, pos_y, pos_z, dir_x, dir_y, dir_z]
   dt_segment:
-    # [pos_x, pos_y, pos_z, dir_x, dir_y, dir_z]
-
     offset: [
       0, 0, 0, # pos_x, pos_y, pos_z
       0, 0, 0, # dir_x, dir_y, dir_z
     ]
     scale: [
-      780, 720, 653, # FIXME: check
+      770.354, 720.480, 649.957,
       1, 1, 1,
     ]
 
@@ -76,10 +80,22 @@ preprocessing:
       0, 0, 0
     ]
     scale: [
-      700, 700, 1037.8, # FIXME: check
-      1, 1, 1, # dir_x, dir_y, dir_z; max is 1
+      679.842, 685.146, 1037.740,
+      1, 1, 1,
     ]
 
+  gem_segment:
+    offset: [
+      0, 0, 0,
+      0, 0, 0
+    ]
+    scale: [
+      142.471, 144.120, 538.790,
+      1, 1, 1
+    ]
+
+  # Hits
+  # [pos_x, pos_y, pos_z]
   rpc_hit:
     offset: [
       0, 0, 0
@@ -93,5 +109,5 @@ preprocessing:
       0, 0, 0
     ]
     scale: [
-      241.471, 241.381, 571.811
+      311.673, 312.111, 799.551,
     ]

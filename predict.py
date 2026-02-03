@@ -51,7 +51,7 @@ def run(ckpt_file_path: Path, gpu_id: int):
     model = model.to(device)
 
     print('instantiating datamodule...')
-    datamodule = instantiate(config.data)
+    datamodule = instantiate(config.datamodule)
 
     # NOTE: Callbacks
     output_dir_path = log_dir_path / 'predict'
