@@ -20,7 +20,7 @@ output_dim: ${exp.target_dim}
 
 # model definition
 module:
-  _target_: deepmuonreco.nn.LatentAttentionModel
+  _target_: muonly.nn.LatentAttentionModel
 
   tracker_track_dim: ${..tracker_track_dim}
   dt_segment_dim: ${..dt_segment_dim}

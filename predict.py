@@ -5,8 +5,8 @@ import hydra
 from hydra.utils import instantiate
 import torch
 from omegaconf import OmegaConf
-from deepmuonreco.model import Model
-from deepmuonreco.callbacks import PredictionWriter
+from muonly.model import Model
+from muonly.callbacks import PredictionWriter
 
 
 OmegaConf.register_new_resolver(

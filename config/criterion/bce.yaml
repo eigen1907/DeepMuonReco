@@ -21,7 +21,7 @@ reduction:
   modules:
     - name: mean
       module:
-        _target_: deepmuonreco.nn.MaskedMean
+        _target_: muonly.nn.MaskedMean
       in_keys:
         - [masks, tracker_track] # mask
         - loss # input

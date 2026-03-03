@@ -50,4 +50,4 @@ exp:
   pos_weight: 30.0
 
 paths:
-  data_dir: /hdfs/ml/deepmuonreco/data/CMSSW_14_0_21_patch1/mu2024pu/
+  data_dir: /hdfs/ml/muonly/data/CMSSW_14_0_21_patch1/mu2024pu/

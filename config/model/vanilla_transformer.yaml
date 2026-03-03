@@ -15,7 +15,7 @@ gem_hit_dim: ${eval:'len(${feature_set.gem_hit})'}
 output_dim: ${exp.target_dim}
 
 module:
-  _target_: deepmuonreco.nn.VanillaTransformerModel
+  _target_: muonly.nn.VanillaTransformerModel
 
   tracker_track_dim: ${..tracker_track_dim}
   dt_segment_dim: ${..dt_segment_dim}

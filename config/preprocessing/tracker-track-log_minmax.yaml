@@ -3,7 +3,7 @@ modules:
   # NOTE: track: [px, py, pz, q]
   - name: tracker_track_log
     module:
-      _target_: deepmuonreco.nn.SignedLog1p
+      _target_: muonly.nn.SignedLog1p
       index: ${feature_set.preprocessing.tracker_track_log.index}
     in_keys:
       - tracker_track
@@ -12,7 +12,7 @@ modules:
 
   - name: tracker_track_norm
     module:
-      _target_: deepmuonreco.nn.Normalize
+      _target_: muonly.nn.Normalize
       offset: ${feature_set.preprocessing.tracker_track_log.offset}
       scale: ${feature_set.preprocessing.tracker_track_log.scale}
     in_keys:
@@ -23,7 +23,7 @@ modules:
   # NOTE: DT segment:
   - name: dt_seg_norm
     module:
-      _target_: deepmuonreco.nn.Normalize
+      _target_: muonly.nn.Normalize
       offset: ${feature_set.preprocessing.dt_segment.offset}
       scale: ${feature_set.preprocessing.dt_segment.scale}
     in_keys:
@@ -34,7 +34,7 @@ modules:
   # NOTE: CSC segment:
   - name: csc_seg_norm
     module:
-      _target_: deepmuonreco.nn.Normalize
+      _target_: muonly.nn.Normalize
       offset: ${feature_set.preprocessing.csc_segment.offset}
       scale: ${feature_set.preprocessing.csc_segment.scale}
     in_keys:
@@ -45,7 +45,7 @@ modules:
   # NOTE: GEM segment:
   - name: gem_seg_norm
     module:
-      _target_: deepmuonreco.nn.Normalize
+      _target_: muonly.nn.Normalize
       offset: ${feature_set.preprocessing.gem_segment.offset}
       scale: ${feature_set.preprocessing.gem_segment.scale}
     in_keys:
@@ -56,7 +56,7 @@ modules:
   # NOTE: RPC hit
   - name: rpc_hit_norm
     module:
-      _target_: deepmuonreco.nn.Normalize
+      _target_: muonly.nn.Normalize
       offset: ${feature_set.preprocessing.rpc_hit.offset}
       scale: ${feature_set.preprocessing.rpc_hit.scale}
     in_keys:
@@ -67,7 +67,7 @@ modules:
   # NOTE: GEM hit
   - name: gem_hit_norm
     module:
-      _target_: deepmuonreco.nn.Normalize
+      _target_: muonly.nn.Normalize
       offset: ${feature_set.preprocessing.gem_hit.offset}
       scale: ${feature_set.preprocessing.gem_hit.scale}
     in_keys:

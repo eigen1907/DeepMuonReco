@@ -15,7 +15,7 @@ val:
 
       roc_auc:
         metric:
-          _target_: deepmuonreco.metrics.MaskingWrapper
+          _target_: muonly.metrics.MaskingWrapper
           metric:
             _target_: torchmetrics.classification.BinaryAUROC
             compute_on_cpu: true
@@ -33,7 +33,7 @@ test:
     modules:
       - name: target_to_long
         module:
-          _target_: deepmuonreco.nn.ToDtype
+          _target_: muonly.nn.ToDtype
           dtype: long
 
         in_keys:
@@ -53,9 +53,9 @@ test:
 
       roc_curve:
         metric:
-          _target_: deepmuonreco.metrics.MaskingWrapper
+          _target_: muonly.metrics.MaskingWrapper
           metric:
-            _target_: deepmuonreco.metrics.PlotWrapper
+            _target_: muonly.metrics.PlotWrapper
             metric:
               _target_: torchmetrics.classification.BinaryROC
               compute_on_cpu: true

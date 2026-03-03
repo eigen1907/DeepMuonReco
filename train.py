@@ -13,8 +13,8 @@ from lightning import seed_everything
 from omegaconf import DictConfig
 from omegaconf import OmegaConf
 from coolname import generate_slug
-from deepmuonreco.model import Model
-from deepmuonreco.nn.utils import init_params
+from muonly.model import Model
+from muonly.nn.utils import init_params
 
 
 _logger = getLogger(__name__)

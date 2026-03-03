@@ -1,4 +1,4 @@
-name: deepmuonreco-py312
+name: muonly-py312
 channels:
   - conda-forge
 dependencies:

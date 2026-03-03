@@ -1,4 +1,4 @@
-_target_: deepmuonreco.logger.Logger
+_target_: muonly.logger.Logger
 repo: ${paths.log_dir}
 experiment: ${exp.name}
 run: ${run.name}

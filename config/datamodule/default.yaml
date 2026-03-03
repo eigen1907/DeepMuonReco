@@ -1,6 +1,6 @@
-_target_: deepmuonreco.data.DataModule
+_target_: muonly.data.DataModule
 
-dataset: deepmuonreco.data.TrackerTrackSelectionDataset
+dataset: muonly.data.TrackerTrackSelectionDataset
 
 root: ${paths.data_dir}
 

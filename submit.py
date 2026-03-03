@@ -12,7 +12,7 @@ from htcondor.htcondor import Schedd
 from coolname import generate_slug
 
 
-PROJECT_NAME = 'deepmuonreco'
+PROJECT_NAME = 'muonly'
 
 def make_exp_name(config_file: Path, **kwargs) -> str:
     if kwargs.get('debug'):
