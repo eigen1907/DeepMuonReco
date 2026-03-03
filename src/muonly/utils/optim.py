@@ -1,53 +1,85 @@
+import logging
 import torch.nn as nn
-from torch.nn import Parameter
+from torch.nn.modules.conv import _ConvNd
+from torch.nn.modules.batchnorm import _BatchNorm
 
 
-# FIXME: rename
-def group_parameters(
+_logger = logging.getLogger(__name__)
+
+
+def get_parameter_groups(
     model: nn.Module,
     weight_decay: float,
-) -> list[dict[str, Parameter | float]]:
-    '''
-    adapted from https://github.com/karpathy/nanoGPT/blob/eba36e84649f3c6d840a93092cb779a260544d08/model.py#L263-L287
-    '''
-    # separate out all parameters to those that will and won't experience regularizing weight decay
-    decay = set()
-    no_decay = set()
-    whitelist_weight_modules = (nn.Linear, )
-    blacklist_weight_modules = (nn.LayerNorm, nn.Embedding)
-    for mn, m in model.named_modules():
-        for pn, _ in m.named_parameters():
-            fpn = f'{mn}.{pn}' if mn else pn # full param name
-            # random note: because named_modules and named_parameters are recursive
-            # we will see the same tensors p many many times. but doing it this way
-            # allows us to know which parent module any tensor p belongs to...
-            if pn.endswith('bias'):
-                # all biases will not be decayed
-                no_decay.add(fpn)
-            elif pn.endswith('weight') and isinstance(m, whitelist_weight_modules):
-                # weights of whitelist modules will be weight decayed
-                decay.add(fpn)
-            elif pn.endswith('weight') and isinstance(m, blacklist_weight_modules):
-                # weights of blacklist modules will NOT be weight decayed
-                no_decay.add(fpn)
+) -> list[dict]:
+    """ """
+    if weight_decay < 0.0 or weight_decay > 1.0:
+        raise ValueError(
+            f"Invalid weight_decay value: {weight_decay}. Expected a value between 0.0 and 1.0."
+        )
+    if weight_decay == 0.0:
+        _logger.warning(
+            "Weight decay is set to 0.0. All parameters will be included in the no_decay group."
+        )
+        return [{"params": list(model.parameters()), "weight_decay": 0.0}]
 
-    for mn, m in model.named_modules():
-        for pn, _ in m.named_parameters():
-            fpn = f'{mn}.{pn}' if mn else pn # full param name
-            if fpn not in decay and fpn not in no_decay:
-                no_decay.add(fpn)
 
-    # validate that we considered every parameter
-    param_dict = {pn: p for pn, p in model.named_parameters()}
-    inter_params = decay & no_decay
-    union_params = decay | no_decay
-    assert len(inter_params) == 0, "parameters %s made it into both decay/no_decay sets!" % (str(inter_params), )
-    assert len(param_dict.keys() - union_params) == 0, "parameters %s were not separated into either decay/no_decay set!" \
-                                                % (str(param_dict.keys() - union_params), )
-    # create the pytorch optimizer object
-    params = [
-        {"params": [param_dict[pn] for pn in sorted(list(decay))], "weight_decay": weight_decay},
-        {"params": [param_dict[pn] for pn in sorted(list(no_decay))], "weight_decay": 0.0},
+    decay_param_list = []
+    no_decay_param_list = []
+
+    for module_name, module in model.named_modules():
+        param_name_list = []
+        param_list = []
+        for name, param in module.named_parameters(recurse=False):
+            if not param.requires_grad:
+                continue
+            param_name_list.append(name)
+            param_list.append(param)
+
+        if len(param_list) == 0:
+            _logger.debug(
+                f"Module '{module_name}' of type '{type(module).__name__}' has no trainable parameters. Skipping this module."
+            )
+            continue
+
+        if isinstance(module, (nn.Linear, _ConvNd)):
+            decay_param_list.append(module.weight)
+            if module.bias is not None:
+                no_decay_param_list.append(module.bias)
+        elif isinstance(module, nn.Embedding):
+            decay_param_list.append(module.weight)
+        elif isinstance(module, nn.RNNBase):
+            for name, param in module.named_parameters():
+                # https://github.com/pytorch/pytorch/blob/v2.10.0/torch/nn/modules/rnn.py#L192C32-L200
+                if name.startswith("weight_"):
+                    decay_param_list.append(param)
+                elif name.startswith("bias_"):
+                    no_decay_param_list.append(param)
+                else:
+                    raise ValueError(
+                        f"Unexpected parameter name '{name}' in RNN module. Expected names to start with 'weight_' or 'bias_'."
+                    )
+        elif isinstance(module, nn.MultiheadAttention):
+            for name, param in zip(param_name_list, param_list):
+                if name.endswith("weight"):
+                    decay_param_list.append(param)
+                elif name.endswith("bias"):
+                    no_decay_param_list.append(param)
+                else:
+                    raise ValueError(
+                        f"Unexpected parameter name '{name}' in MultiheadAttention module. Expected names to end with 'weight' or 'bias'."
+                    )
+        elif isinstance(module, (_BatchNorm, nn.LayerNorm)):
+            no_decay_param_list += param_list
+        else:
+            for param_name, param in zip(param_name_list, param_list):
+                _logger.warning(
+                    f"Module '{module_name}' of type '{type(module).__name__}' is not explicitly handled. Parameter '{param_name}' will be included in the weight decay group by default."
+                )
+                decay_param_list.append(param)
+
+    # TODO: Add a check to ensure that all parameters are included in either decay_param_list or no_decay_param_list, and that there are no duplicates.
+
+    return [
+        {"params": decay_param_list, "weight_decay": weight_decay},
+        {"params": no_decay_param_list, "weight_decay": 0.0},
     ]
-
-    return params

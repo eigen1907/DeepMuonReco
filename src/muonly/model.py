@@ -21,7 +21,7 @@ from hydra.utils import instantiate
 from .utils.config import build_tensordictmodule
 from .utils.config import build_tensordictsequential
 from .utils.config import build_metric_collection
-from .utils.optim import group_parameters
+from .utils.optim import get_parameter_groups
 
 
 _logger = getLogger(__name__)
@@ -201,7 +201,7 @@ class Model(LightningModule):
 
     def _configure_optimizer(self) -> Optimizer:
         config = self._optimizer_config
-        params = group_parameters(
+        params = get_parameter_groups(
             model=self.model,
             weight_decay=config.weight_decay,
         )
