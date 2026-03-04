@@ -60,6 +60,7 @@ class DataModule(LightningDataModule):
 
         dataset_cls = get_class(self.hparams["dataset"])
         _logger.info(f"Using dataset class {dataset_cls.__name__} for {prefix} set")
+
         file_name = self.hparams[f"{prefix}_file"]
         if file_name is None:
             raise ValueError(f"File name for {prefix} set is not specified.")
@@ -82,20 +83,19 @@ class DataModule(LightningDataModule):
         for key in key_list:
             kwargs[key] = self.hparams[key]
 
+        _logger.info(f"Loading {prefix} set")
         with elapsed_timer() as elapsed_time:
             dataset = dataset_cls(
                 path=path,
                 max_events=self.hparams[f"{prefix}_max_events"],
                 **kwargs,
             )
+        _logger.info(f"Loaded {prefix} set with {len(dataset)} examples in {elapsed_time():.2f} seconds")
 
+        _logger.info(f"Preprocessing {prefix} set")
         preprocessing = self.hparams["preprocessing"]
         dataset.preprocess(preprocessing)
-
-        # logging the dataset, the number of examples  for debugging
-        _logger.info(
-            f"Loaded {prefix} set with {len(dataset)} examples in {elapsed_time():.2f} seconds"
-        )
+        _logger.info(f"Preprocessed {prefix} set in {elapsed_time():.2f} seconds")
 
         return dataset
 

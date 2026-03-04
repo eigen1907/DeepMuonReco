@@ -217,6 +217,7 @@ class TrackerTrackSelectionDataset(Dataset):
             preprocessing (dict): A dictionary where keys are object name (e.g., 'tracker_track', 'dt_segment', etc.) and values are lists of transforms to apply to that object.
         """
         preprocessing = {key: Compose(value) for key, value in preprocessing.items()}
+
         # drop if the key is not found in the examples, and log a warning
         unavailable_keys = [
             key
@@ -230,9 +231,15 @@ class TrackerTrackSelectionDataset(Dataset):
             for key in unavailable_keys:
                 del preprocessing[key]
 
+
+        for key, value in preprocessing.items():
+            _logger.info(f"Applying the following transforms to {key}: {value}")
+
+        _logger.info("Preprocessing examples ...")
         for example in tqdm.rich.tqdm(self.example_list):
             for key, transforms in preprocessing.items():
                 example[key] = transforms(example[key])
+        _logger.info("Preprocessing completed.")
 
         return self
 
