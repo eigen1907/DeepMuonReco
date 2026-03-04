@@ -30,7 +30,6 @@ class PerceiverEncoder(nn.Module):
         num_heads: int,
         use_post_attention_residual: bool = True,
         widening_factor: int = 4,
-        input_dim: int | None = None,
         dropout: float = 0,
         bias: bool = False,
     ) -> None:
@@ -43,9 +42,6 @@ class PerceiverEncoder(nn.Module):
             embed_dim=latent_dim,
             num_heads=num_heads,
             use_post_attention_residual=use_post_attention_residual,
-            target_dim=latent_dim,
-            source_dim=input_dim,
-            output_dim=None,
             dropout=dropout,
             bias=bias,
         )
@@ -170,9 +166,7 @@ class PerceiverBasicDecoder(nn.Module):
     def __init__(
         self,
         latent_dim: int,
-        query_dim: int | None = None,
         num_heads: int = 1,
-        embed_dim: int | None = None,
         widening_factor: int = 1,
         use_post_attention_residual: bool = False,
         dropout: float = 0,
@@ -187,19 +181,14 @@ class PerceiverBasicDecoder(nn.Module):
         """
         super().__init__()
 
-        embed_dim = embed_dim or latent_dim
-        query_dim = query_dim or latent_dim
-
         self.attention = CrossAttentionBlock(
-            embed_dim=embed_dim,
+            embed_dim=latent_dim,
             num_heads=num_heads,
             use_post_attention_residual=use_post_attention_residual,
-            target_dim=query_dim,
-            source_dim=latent_dim,
             dropout=dropout,
         )
         self.mlp = MLPBlock(
-            embed_dim=embed_dim,
+            embed_dim=latent_dim,
             widening_factor=widening_factor,
             dropout=dropout,
         )
