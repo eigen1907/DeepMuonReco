@@ -26,6 +26,8 @@ dependencies = [
     "hydra-colorlog",
     "coolname",
     "htcondor",
+    "rich>=14.3.3",
+    "setuptools==81.0.0",
 ]
 
 [dependency-groups]
