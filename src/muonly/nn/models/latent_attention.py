@@ -34,7 +34,7 @@ class LatentAttentionModel(nn.Module):
         muon_det_processor_block_weight_sharing: bool,
         encoder_num_layers: int,
         decoder_num_layers: int,
-        dropout_p: float = 0.1,
+        dropout: float = 0.1,
         widening_factor: int = 4,
     ) -> None:
         """
@@ -77,7 +77,7 @@ class LatentAttentionModel(nn.Module):
             num_heads=num_heads,
             use_post_attention_residual=True,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
             bias=True,
         )
 
@@ -87,7 +87,7 @@ class LatentAttentionModel(nn.Module):
             num_heads=num_heads,
             use_post_attention_residual=True,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
             bias=True,
         )
 
@@ -96,7 +96,7 @@ class LatentAttentionModel(nn.Module):
             latent_dim=model_dim,
             num_heads=num_heads,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
             weight_sharing=muon_det_processor_block_weight_sharing,
         )
 
@@ -105,7 +105,7 @@ class LatentAttentionModel(nn.Module):
             num_heads=num_heads,
             num_layers=encoder_num_layers,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
             self_attn=False,
         )
 
@@ -114,7 +114,7 @@ class LatentAttentionModel(nn.Module):
             num_heads=num_heads,
             num_layers=decoder_num_layers,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
             self_attn=False,
         )
 

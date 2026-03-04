@@ -20,4 +20,4 @@ muon_det_processor_block_weight_sharing: false
 encoder_num_layers: 1
 decoder_num_layers: 1
 widening_factor: 4
-dropout_p: 0
+dropout: 0

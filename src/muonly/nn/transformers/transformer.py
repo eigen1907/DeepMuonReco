@@ -30,35 +30,26 @@ class CrossAttentionBlock(nn.Module):
         embed_dim: int,
         num_heads: int,
         use_post_attention_residual: bool,
-        target_dim: int | None = None,
-        source_dim: int | None = None,
-        output_dim: int | None = None,
-        dropout_p: float = 0,
+        dropout: float = 0,
         bias: bool = True,
     ) -> None:
         """ """
         super().__init__()
 
-        target_dim = target_dim or embed_dim
-        source_dim = source_dim or embed_dim
-
         self.use_post_attention_residual = use_post_attention_residual
 
         self.norm_src = nn.LayerNorm(
-            normalized_shape=source_dim,
+            normalized_shape=embed_dim,
             bias=bias,
         )
         self.norm_tgt = nn.LayerNorm(
-            normalized_shape=target_dim,
+            normalized_shape=embed_dim,
             bias=bias,
         )
         self.attn = CrossAttention(
             embed_dim=embed_dim,
             num_heads=num_heads,
-            target_dim=target_dim,
-            source_dim=source_dim,
-            output_dim=output_dim,
-            dropout_p=dropout_p,
+            dropout=dropout,
             bias=bias,
         )
 
@@ -89,8 +80,7 @@ class SelfAttentionBlock(nn.Module):
         embed_dim: int,
         num_heads: int,
         input_dim: int | None = None,
-        output_dim: int | None = None,
-        dropout_p: float = 0,
+        dropout: float = 0,
         bias: bool = True,
     ) -> None:
         """ """
@@ -104,9 +94,7 @@ class SelfAttentionBlock(nn.Module):
         self.attn = SelfAttention(
             embed_dim=embed_dim,
             num_heads=num_heads,
-            input_dim=input_dim,
-            output_dim=output_dim,
-            dropout_p=dropout_p,
+            dropout=dropout,
             bias=bias,
         )
 
@@ -141,7 +129,7 @@ class MLPBlock(nn.Module):
         embed_dim: int,
         widening_factor: int,
         bias: bool = True,
-        dropout_p: float = 0,
+        dropout: float = 0,
     ) -> None:
         """ """
         super().__init__()
@@ -151,11 +139,10 @@ class MLPBlock(nn.Module):
             bias=bias,
         )
         self.mlp = MultiLayerPerceptron(
-            input_dim=embed_dim,
-            output_dim=None,
+            embed_dim=embed_dim,
             widening_factor=widening_factor,
             bias=bias,
-            dropout_p=dropout_p,
+            dropout=dropout,
         )
 
     def forward(
@@ -179,19 +166,19 @@ class TransformerEncoderLayer(nn.Module):
         model_dim: int,
         num_heads: int,
         widening_factor: int,
-        dropout_p: float = 0,
+        dropout: float = 0,
     ) -> None:
         """ """
         super().__init__()
         self.attention = SelfAttentionBlock(
             embed_dim=model_dim,
             num_heads=num_heads,
-            dropout_p=dropout_p,
+            dropout=dropout,
         )
         self.mlp = MLPBlock(
             embed_dim=model_dim,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
         )
 
     def forward(
@@ -219,7 +206,7 @@ class TransformerEncoder(nn.Module):
         num_heads: int,
         num_layers: int = 1,
         widening_factor: int = 1,
-        dropout_p: float = 0,
+        dropout: float = 0,
     ) -> None:
         """ """
         super().__init__()
@@ -228,7 +215,7 @@ class TransformerEncoder(nn.Module):
             model_dim=model_dim,
             num_heads=num_heads,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
         )
 
         self.layer_list = nn.ModuleList(_get_clones(layer, num_layers))
@@ -267,7 +254,7 @@ class TransformerDecoderLayer(nn.Module):
         model_dim: int,
         num_heads: int,
         widening_factor: int,
-        dropout_p: float = 0,
+        dropout: float = 0,
         self_attn: bool = True,
     ) -> None:
         """ """
@@ -276,7 +263,7 @@ class TransformerDecoderLayer(nn.Module):
             self.self_attn = SelfAttentionBlock(
                 embed_dim=model_dim,
                 num_heads=num_heads,
-                dropout_p=dropout_p,
+                dropout=dropout,
             )
         else:
             self.self_attn = None
@@ -284,13 +271,13 @@ class TransformerDecoderLayer(nn.Module):
         self.cross_attn = CrossAttentionBlock(
             embed_dim=model_dim,
             num_heads=num_heads,
-            dropout_p=dropout_p,
+            dropout=dropout,
             use_post_attention_residual=False,
         )
         self.mlp = MLPBlock(
             embed_dim=model_dim,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
         )
 
     def forward(
@@ -329,7 +316,7 @@ class TransformerDecoder(nn.Module):
         num_heads: int,
         num_layers: int = 1,
         widening_factor: int = 1,
-        dropout_p: float = 0,
+        dropout: float = 0,
         self_attn: bool = True,
     ) -> None:
         """ """
@@ -341,7 +328,7 @@ class TransformerDecoder(nn.Module):
             model_dim=model_dim,
             num_heads=num_heads,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
             self_attn=self_attn,
         )
 

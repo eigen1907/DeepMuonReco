@@ -1,7 +1,3 @@
-r"""
-- https://github.com/google-deepmind/hierarchical_perceiver/blob/b3074a4/perceiver_helpers.py
-"""
-
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
@@ -9,20 +5,17 @@ import einops as eo
 
 
 __all__ = [
-    "CrossAttention",
-    "SelfAttention",
+    'CrossAttention',
+    'SelfAttention',
 ]
 
 
-class CrossAttention(nn.Module):
+class _Attention(nn.Module):
     def __init__(
         self,
         embed_dim: int,
         num_heads: int,
-        target_dim: int | None = None,
-        source_dim: int | None = None,
-        output_dim: int | None = None,
-        dropout_p: float = 0,
+        dropout: float = 0,
         bias: bool = True,
     ) -> None:
         """ """
@@ -33,57 +26,31 @@ class CrossAttention(nn.Module):
                 f"embed_dim ({embed_dim}) must be divisible by num_heads ({num_heads})"
             )
 
-        target_dim = target_dim or embed_dim
-        source_dim = source_dim or embed_dim
-        output_dim = output_dim or embed_dim
-
         self.num_heads = num_heads
-        self._dropout_p = dropout_p
+        self._dropout = dropout
 
-        self.query_projection = nn.Linear(
-            in_features=target_dim,
-            out_features=embed_dim,
-            bias=bias,
-        )
-        self.key_projection = nn.Linear(
-            in_features=source_dim,
-            out_features=embed_dim,
-            bias=bias,
-        )
-        self.value_projection = nn.Linear(
-            in_features=source_dim,
-            out_features=embed_dim,
-            bias=bias,
-        )
-        self.output_projection = nn.Linear(
+        self.out_proj = nn.Linear(
             in_features=embed_dim,
-            out_features=output_dim,
+            out_features=embed_dim,
             bias=bias,
         )
-        self.output_dropout = nn.Dropout(
-            p=dropout_p,
+
+        self.out_dropout = nn.Dropout(
+            p=dropout,
         )
 
-    @property
-    def dropout_p(self):
-        return self._dropout_p if self.training else 0
-
-    def forward(
+    def _forward(
         self,
-        target: Tensor,
-        source: Tensor,
+        query: Tensor,
+        key: Tensor,
+        value: Tensor,
         attn_mask: Tensor | None,
     ) -> Tensor:
         """ """
-        query = self.query_projection(target)
-        key = self.key_projection(source)
-        value = self.value_projection(source)
-
         query, key, value = [
             eo.rearrange(each, "n l (h d) -> n h l d", h=self.num_heads)
             for each in [query, key, value]
         ]
-
         if attn_mask is not None:
             attn_mask = eo.repeat(
                 tensor=attn_mask,
@@ -96,7 +63,7 @@ class CrossAttention(nn.Module):
             key=key,
             value=value,
             attn_mask=attn_mask,
-            dropout_p=self.dropout_p,
+            dropout_p=(self._dropout if self.training else 0),
         )
 
         output = eo.rearrange(
@@ -104,40 +71,84 @@ class CrossAttention(nn.Module):
             pattern="n h t d -> n t (h d)",
         )
 
-        output = self.output_projection(output)
-        output = self.output_dropout(output)
+        output = self.out_proj(output)
+        output = self.out_dropout(output)
         return output
 
 
-class SelfAttention(CrossAttention):
+class CrossAttention(_Attention):
     def __init__(
         self,
         embed_dim: int,
         num_heads: int,
-        input_dim: int | None = None,
-        output_dim: int | None = None,
-        dropout_p: float = 0,
+        dropout: float = 0,
         bias: bool = True,
     ) -> None:
         """ """
         super().__init__(
             embed_dim=embed_dim,
             num_heads=num_heads,
-            target_dim=input_dim,
-            source_dim=input_dim,
-            output_dim=output_dim,
-            dropout_p=dropout_p,
+            dropout=dropout,
             bias=bias,
         )
 
-    def forward(  # type: ignore[override]
-        self, input: Tensor, attn_mask: Tensor | None
+        self.q_proj = nn.Linear(
+            in_features=embed_dim, out_features=embed_dim, bias=bias
+        )
+        self.kv_proj = nn.Linear(
+            in_features=embed_dim, out_features=(2 * embed_dim), bias=bias
+        )
+
+    def forward(
+        self,
+        target: Tensor,
+        source: Tensor,
+        attn_mask: Tensor | None,
     ) -> Tensor:
-        """
-        Args:
-            input:
-            attn_mask:
-        Returns:
-            output
-        """
-        return super().forward(target=input, source=input, attn_mask=attn_mask)
+        """ """
+        query = self.q_proj(target)
+        key, value = self.kv_proj(source).chunk(chunks=2, dim=-1)
+
+        return self._forward(
+            query=query,
+            key=key,
+            value=value,
+            attn_mask=attn_mask,
+        )
+
+
+class SelfAttention(_Attention):
+    def __init__(
+        self,
+        embed_dim: int,
+        num_heads: int,
+        dropout: float = 0,
+        bias: bool = True,
+    ) -> None:
+        """ """
+        super().__init__(
+            embed_dim=embed_dim,
+            num_heads=num_heads,
+            dropout=dropout,
+            bias=bias,
+        )
+
+        self.qkv_proj = nn.Linear(
+            in_features=embed_dim,
+            out_features=(3 * embed_dim),
+            bias=bias,
+        )
+
+    def forward(
+        self,
+        input: Tensor,
+        attn_mask: Tensor | None,
+    ) -> Tensor:
+        """ """
+        query, key, value = self.qkv_proj(input).chunk(chunks=3, dim=-1)
+        return self._forward(
+            query=query,
+            key=key,
+            value=value,
+            attn_mask=attn_mask,
+        )

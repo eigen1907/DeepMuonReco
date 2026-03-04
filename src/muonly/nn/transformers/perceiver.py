@@ -31,7 +31,7 @@ class PerceiverEncoder(nn.Module):
         use_post_attention_residual: bool = True,
         widening_factor: int = 4,
         input_dim: int | None = None,
-        dropout_p: float = 0,
+        dropout: float = 0,
         bias: bool = False,
     ) -> None:
         """ """
@@ -46,14 +46,14 @@ class PerceiverEncoder(nn.Module):
             target_dim=latent_dim,
             source_dim=input_dim,
             output_dim=None,
-            dropout_p=dropout_p,
+            dropout=dropout,
             bias=bias,
         )
 
         self.mlp = MLPBlock(
             embed_dim=latent_dim,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
         )
 
     def _make_latent(self, latent_len: int, latent_dim: int) -> nn.Parameter:
@@ -129,7 +129,7 @@ class PerceiverProcessorBlock(nn.Module):
         latent_dim: int,
         num_heads: int,
         widening_factor: int = 4,
-        dropout_p: float = 0,
+        dropout: float = 0,
         weight_sharing: bool = False,
     ) -> None:
         """ """
@@ -145,7 +145,7 @@ class PerceiverProcessorBlock(nn.Module):
             model_dim=latent_dim,
             num_heads=num_heads,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
         )
 
         if weight_sharing:
@@ -175,7 +175,7 @@ class PerceiverBasicDecoder(nn.Module):
         embed_dim: int | None = None,
         widening_factor: int = 1,
         use_post_attention_residual: bool = False,
-        dropout_p: float = 0,
+        dropout: float = 0,
     ) -> None:
         """
         Args:
@@ -196,12 +196,12 @@ class PerceiverBasicDecoder(nn.Module):
             use_post_attention_residual=use_post_attention_residual,
             target_dim=query_dim,
             source_dim=latent_dim,
-            dropout_p=dropout_p,
+            dropout=dropout,
         )
         self.mlp = MLPBlock(
             embed_dim=embed_dim,
             widening_factor=widening_factor,
-            dropout_p=dropout_p,
+            dropout=dropout,
         )
 
     def forward(
