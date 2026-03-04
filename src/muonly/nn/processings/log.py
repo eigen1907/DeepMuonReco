@@ -4,13 +4,13 @@ from .index import Indexible
 
 __all__ = [
     # functional
-    'signed_log1p',
-    'signed_expm1',
+    "signed_log1p",
+    "signed_expm1",
     # modules
-    'Log',
-    'Log1p',
-    'SignedLog1p',
-    'SignedExpm1',
+    "Log",
+    "Log1p",
+    "SignedLog1p",
+    "SignedExpm1",
 ]
 
 
@@ -23,24 +23,20 @@ def signed_expm1(x: Tensor):
 
 
 class Log(Indexible):
-
     def _forward(self, input: Tensor) -> Tensor:
         return input.log_()
 
 
 class Log1p(Indexible):
-
     def _forward(self, input: Tensor) -> Tensor:
         return input.log1p_()
 
 
 class SignedLog1p(Indexible):
-
     def _forward(self, input: Tensor) -> Tensor:
         return signed_log1p(input)
 
 
 class SignedExpm1(Indexible):
-
     def _forward(self, input: Tensor) -> Tensor:
         return signed_expm1(input)

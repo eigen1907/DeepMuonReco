@@ -5,12 +5,11 @@ from ..utils import make_cross_attn_mask, make_self_attn_mask
 
 
 __all__ = [
-    'VanillaTransformerModel',
+    "VanillaTransformerModel",
 ]
 
 
 class VanillaTransformerModel(nn.Module):
-
     def __init__(
         self,
         # input dimensions
@@ -25,7 +24,7 @@ class VanillaTransformerModel(nn.Module):
         # model hyperparameters
         model_dim: int = 64,
         feedforward_dim: int = 128,
-        activation: str = 'relu',
+        activation: str = "relu",
         num_heads: int = 2,
         num_layers: int = 1,
         dropout: float = 0.1,
@@ -35,14 +34,26 @@ class VanillaTransformerModel(nn.Module):
         self.num_heads = num_heads
 
         # tracker track: tt
-        self.tracker_track_embedder = nn.Linear(in_features=tracker_track_dim, out_features=model_dim)
+        self.tracker_track_embedder = nn.Linear(
+            in_features=tracker_track_dim, out_features=model_dim
+        )
 
         # muon detector measurements: mdm
-        self.dt_segment_embedder = nn.Linear(in_features=dt_segment_dim, out_features=model_dim)
-        self.csc_segment_embedder = nn.Linear(in_features=csc_segment_dim, out_features=model_dim)
-        self.gem_segment_embedder = nn.Linear(in_features=gem_segment_dim, out_features=model_dim)
-        self.rpc_hit_embedder = nn.Linear(in_features=rpc_hit_dim, out_features=model_dim)
-        self.gem_hit_embedder = nn.Linear(in_features=gem_hit_dim, out_features=model_dim)
+        self.dt_segment_embedder = nn.Linear(
+            in_features=dt_segment_dim, out_features=model_dim
+        )
+        self.csc_segment_embedder = nn.Linear(
+            in_features=csc_segment_dim, out_features=model_dim
+        )
+        self.gem_segment_embedder = nn.Linear(
+            in_features=gem_segment_dim, out_features=model_dim
+        )
+        self.rpc_hit_embedder = nn.Linear(
+            in_features=rpc_hit_dim, out_features=model_dim
+        )
+        self.gem_hit_embedder = nn.Linear(
+            in_features=gem_hit_dim, out_features=model_dim
+        )
 
         layer = nn.TransformerDecoderLayer(
             d_model=model_dim,
@@ -118,7 +129,7 @@ class VanillaTransformerModel(nn.Module):
                 rpc_hit_embed,
                 gem_hit_embed,
             ],
-            dim=1, # along sequence length dimension
+            dim=1,  # along sequence length dimension
         )
 
         muon_det_data_mask = torch.cat(
@@ -129,7 +140,7 @@ class VanillaTransformerModel(nn.Module):
                 rpc_hit_data_mask,
                 gem_hit_data_mask,
             ],
-            dim=1 # along sequence length dimension
+            dim=1,  # along sequence length dimension
         )
 
         tracker_track_pad_mask = ~tracker_track_data_mask

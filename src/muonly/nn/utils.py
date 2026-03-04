@@ -13,7 +13,7 @@ def make_cross_attn_mask(
 
     attn_mask = eo.repeat(
         tensor=source_pad_mask,
-        pattern='n s -> (n h) t s',
+        pattern="n s -> (n h) t s",
         h=num_heads,
         t=target_len,
     )
@@ -25,16 +25,13 @@ def make_self_attn_mask(
     num_heads: int,
 ) -> Tensor:
     return make_cross_attn_mask(
-        source_pad_mask=pad_mask,
-        target_pad_mask=pad_mask,
-        num_heads=num_heads
+        source_pad_mask=pad_mask, target_pad_mask=pad_mask, num_heads=num_heads
     )
 
 
 @torch.no_grad()
 def init_params(module: nn.Module) -> None:
-    """
-    """
+    """ """
     if isinstance(module, nn.Linear):
         nn.init.normal_(module.weight, mean=0.0, std=0.02)
         if module.bias is not None:

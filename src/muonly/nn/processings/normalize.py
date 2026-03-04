@@ -3,8 +3,8 @@ from torch import nn, Tensor
 
 
 __all__ = [
-    'Normalize',
-    'MinMaxScaling',
+    "Normalize",
+    "MinMaxScaling",
 ]
 
 
@@ -23,9 +23,8 @@ class Normalize(nn.Module):
         offset = torch.tensor(offset, dtype=torch.float32)
         scale = torch.tensor(scale, dtype=torch.float32)
 
-        self.register_buffer('offset', offset)
-        self.register_buffer('scale', scale)
-
+        self.register_buffer("offset", offset)
+        self.register_buffer("scale", scale)
 
     def forward(self, input: Tensor) -> Tensor:
         # Check if input is empty
@@ -57,19 +56,19 @@ class MinMaxScaling(nn.Module):
         super().__init__()
 
         self.register_buffer(
-            name='input_min',
+            name="input_min",
             tensor=torch.tensor(data=input_min, dtype=torch.float),
         )
         self.register_buffer(
-            name='input_max',
+            name="input_max",
             tensor=torch.tensor(data=input_max, dtype=torch.float),
         )
         self.register_buffer(
-            name='output_min',
+            name="output_min",
             tensor=torch.tensor(data=output_min, dtype=torch.float),
         )
         self.register_buffer(
-            name='output_max',
+            name="output_max",
             tensor=torch.tensor(data=output_max, dtype=torch.float),
         )
 
@@ -83,5 +82,3 @@ class MinMaxScaling(nn.Module):
             f"input_min={self.input_min.tolist()}, input_max={self.input_max.tolist()}, "
             f"output_min={self.output_min.item()}, output_max={self.output_max.item()}"
         )
-
-

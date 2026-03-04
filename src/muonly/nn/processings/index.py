@@ -4,20 +4,18 @@ from torch.nn import Module
 
 
 __all__ = [
-    'Indexible',
+    "Indexible",
 ]
 
 
 class Indexible(Module, metaclass=abc.ABCMeta):
-
     def __init__(self, index: list[int] | None = None) -> None:
         super().__init__()
 
         self.index = index
 
     @abc.abstractmethod
-    def _forward(self, input: Tensor) -> Tensor:
-        ...
+    def _forward(self, input: Tensor) -> Tensor: ...
 
     def forward(self, input: Tensor) -> Tensor:
         """

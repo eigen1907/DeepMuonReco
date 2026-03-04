@@ -19,38 +19,38 @@ from muonly.nn.utils import init_params
 _logger = getLogger(__name__)
 
 # FIXME: config?
-getLogger('matplotlib').setLevel(WARNING)
-getLogger('PIL').setLevel(WARNING)
-getLogger('aim').setLevel(WARNING)
-getLogger('filelock').setLevel(WARNING)
-
+getLogger("matplotlib").setLevel(WARNING)
+getLogger("PIL").setLevel(WARNING)
+getLogger("aim").setLevel(WARNING)
+getLogger("filelock").setLevel(WARNING)
 
 
 OmegaConf.register_new_resolver(
-    'slug',
-    lambda pattern = 2: generate_slug(pattern=pattern),
+    "slug",
+    lambda pattern=2: generate_slug(pattern=pattern),
     use_cache=True,
     replace=True,
 )
 
 OmegaConf.register_new_resolver(
-    name='eval',
+    name="eval",
     resolver=eval,
 )
 
+
 @hydra.main(
-    config_path='./config',
-    config_name='tts',
+    config_path="./config",
+    config_name="tts",
     version_base=None,
 )
 def main(config: DictConfig):
-    _logger.info(' '.join(sys.argv))
-    _logger.info(f'Host: {gethostname()}')
-    _logger.info(f'User: {getuser()}')
-    _logger.info(f'CWD: {Path.cwd()}')
+    _logger.info(" ".join(sys.argv))
+    _logger.info(f"Host: {gethostname()}")
+    _logger.info(f"User: {getuser()}")
+    _logger.info(f"CWD: {Path.cwd()}")
 
     output_dir = Path(config.paths.run_dir)
-    with open(output_dir / 'config.yaml', 'w') as stream:
+    with open(output_dir / "config.yaml", "w") as stream:
         OmegaConf.save(config=config, f=stream)
 
     torch.set_num_threads(config.torch.num_threads)
@@ -60,9 +60,9 @@ def main(config: DictConfig):
     seed_everything(seed=config.run.seed, workers=True)
 
     model = instantiate(config.model)
-    _logger.debug(f'{model=}')
+    _logger.debug(f"{model=}")
 
-    _logger.info('Initializing model weights')
+    _logger.info("Initializing model weights")
     model.apply(init_params)
 
     callback_dict = instantiate(config.callbacks)
@@ -78,32 +78,32 @@ def main(config: DictConfig):
         logger.experiment.name = config.run.name
 
         logger.experiment.set(
-            key='config',
-            val=OmegaConf.to_container(config), # type: ignore
+            key="config",
+            val=OmegaConf.to_container(config),  # type: ignore
         )
         logger.experiment.set(
-            key='env',
+            key="env",
             val={
-                'host': gethostname(),
-                'cwd': str(Path.cwd()),
-                'user': getuser(),
+                "host": gethostname(),
+                "cwd": str(Path.cwd()),
+                "user": getuser(),
             },
         )
         logger.experiment.set(
-            key='model',
+            key="model",
             val={
-                'num_parameters': model.num_parameters,
-            }
+                "num_parameters": model.num_parameters,
+            },
         )
         for tag in config.run.tags:
             logger.experiment.add_tag(tag)
 
-        description_file = output_dir / 'description.txt'
+        description_file = output_dir / "description.txt"
         if description_file.exists():
-            _logger.info(f'Loading description from {description_file}')
-            with open(description_file, 'r') as stream:
+            _logger.info(f"Loading description from {description_file}")
+            with open(description_file, "r") as stream:
                 description = stream.read()
-            _logger.info(f'{description=}')
+            _logger.info(f"{description=}")
             logger.experiment.description = description
         elif description := config.run.description:
             logger.experiment.description = description
@@ -112,27 +112,27 @@ def main(config: DictConfig):
         # `validate` phase is supposed be run with the partial or full validation dataset
         trainer.validate(model=model, datamodule=datamodule)
     else:
-        _logger.info(f'Skipping pre-fit validation as per {config.run.pre_fit_validation=}')
+        _logger.info(
+            f"Skipping pre-fit validation as per {config.run.pre_fit_validation=}"
+        )
 
     if config.run.fit:
         trainer.fit(model=model, datamodule=datamodule)
     else:
-        _logger.info(f'Skipping training as per {config.run.fit=}')
+        _logger.info(f"Skipping training as per {config.run.fit=}")
 
     if config.run.test:
         # `test` phase is supposed be run with the full validation dataset
-        trainer.test(model=model, datamodule=datamodule, ckpt_path='best')
+        trainer.test(model=model, datamodule=datamodule, ckpt_path="best")
     else:
-        _logger.info(f'Skipping testing as per {config.run.test=}')
+        _logger.info(f"Skipping testing as per {config.run.test=}")
 
     if config.run.predict:
         # `predict` phase is supposed be run with the full test dataset
-        trainer.predict(model=model, datamodule=datamodule, ckpt_path='best')
+        trainer.predict(model=model, datamodule=datamodule, ckpt_path="best")
     else:
-        _logger.info(f'Skipping predicting as per {config.run.predict=}')
+        _logger.info(f"Skipping predicting as per {config.run.predict=}")
 
 
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

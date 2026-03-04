@@ -1,6 +1,7 @@
 """
 pre-norm modules
 """
+
 from torch import Tensor
 import torch.nn as nn
 from torch.nn.modules.transformer import _get_clones
@@ -11,19 +12,18 @@ from .mlp import MultiLayerPerceptron
 
 
 __all__ = [
-    'CrossAttentionBlock',
-    'SelfAttentionBlock',
-    'MLPBlock',
-    'TransformerEncoderLayer',
-    'TransformerEncoder',
-    'TransformerDecoderLayer',
-    'TransformerDecoder',
+    "CrossAttentionBlock",
+    "SelfAttentionBlock",
+    "MLPBlock",
+    "TransformerEncoderLayer",
+    "TransformerEncoder",
+    "TransformerDecoderLayer",
+    "TransformerDecoder",
 ]
 
 
 class CrossAttentionBlock(nn.Module):
-    """Cross-attention sub-block
-    """
+    """Cross-attention sub-block"""
 
     def __init__(
         self,
@@ -36,8 +36,7 @@ class CrossAttentionBlock(nn.Module):
         dropout_p: float = 0,
         bias: bool = True,
     ) -> None:
-        """
-        """
+        """ """
         super().__init__()
 
         target_dim = target_dim or embed_dim
@@ -69,8 +68,7 @@ class CrossAttentionBlock(nn.Module):
         source: Tensor,
         attn_mask: Tensor | None,
     ) -> Tensor:
-        """
-        """
+        """ """
         # identity
         identity = target
 
@@ -78,11 +76,7 @@ class CrossAttentionBlock(nn.Module):
         target = self.norm_tgt(target)
         source = self.norm_src(source)
 
-        output = self.attn(
-            target=target,
-            source=source,
-            attn_mask=attn_mask
-        )
+        output = self.attn(target=target, source=source, attn_mask=attn_mask)
 
         if self.use_post_attention_residual:
             output = identity + output
@@ -90,7 +84,6 @@ class CrossAttentionBlock(nn.Module):
 
 
 class SelfAttentionBlock(nn.Module):
-
     def __init__(
         self,
         embed_dim: int,
@@ -98,10 +91,9 @@ class SelfAttentionBlock(nn.Module):
         input_dim: int | None = None,
         output_dim: int | None = None,
         dropout_p: float = 0,
-        bias: bool = True
+        bias: bool = True,
     ) -> None:
-        """
-        """
+        """ """
         super().__init__()
         input_dim = input_dim or embed_dim
 
@@ -144,7 +136,6 @@ class SelfAttentionBlock(nn.Module):
 
 
 class MLPBlock(nn.Module):
-
     def __init__(
         self,
         embed_dim: int,
@@ -152,8 +143,7 @@ class MLPBlock(nn.Module):
         bias: bool = True,
         dropout_p: float = 0,
     ) -> None:
-        """
-        """
+        """ """
         super().__init__()
 
         self.norm = nn.LayerNorm(
@@ -168,13 +158,11 @@ class MLPBlock(nn.Module):
             dropout_p=dropout_p,
         )
 
-
     def forward(
         self,
         input: Tensor,
     ) -> Tensor:
-        """
-        """
+        """ """
         # identity
         identity = input
         # residual
@@ -185,10 +173,7 @@ class MLPBlock(nn.Module):
         return output
 
 
-
 class TransformerEncoderLayer(nn.Module):
-
-
     def __init__(
         self,
         model_dim: int,
@@ -196,8 +181,7 @@ class TransformerEncoderLayer(nn.Module):
         widening_factor: int,
         dropout_p: float = 0,
     ) -> None:
-        """
-        """
+        """ """
         super().__init__()
         self.attention = SelfAttentionBlock(
             embed_dim=model_dim,
@@ -215,8 +199,7 @@ class TransformerEncoderLayer(nn.Module):
         input: Tensor,
         attn_mask: Tensor | None,
     ) -> Tensor:
-        """
-        """
+        """ """
         output = self.attention(
             input=input,
             attn_mask=attn_mask,
@@ -227,10 +210,8 @@ class TransformerEncoderLayer(nn.Module):
         return output
 
 
-
 class TransformerEncoder(nn.Module):
-    """Transformer encoder
-    """
+    """Transformer encoder"""
 
     def __init__(
         self,
@@ -240,8 +221,7 @@ class TransformerEncoder(nn.Module):
         widening_factor: int = 1,
         dropout_p: float = 0,
     ) -> None:
-        """
-        """
+        """ """
         super().__init__()
 
         layer = TransformerEncoderLayer(
@@ -258,15 +238,14 @@ class TransformerEncoder(nn.Module):
         input: Tensor,
         data_mask: Tensor | None,
     ) -> Tensor:
-        """
-        """
+        """ """
         if data_mask is None:
             attn_mask = None
         else:
             # n: batch size, s: source array length, t: target array length
             attn_mask = eo.repeat(
                 tensor=data_mask,
-                pattern='n s -> n t s',
+                pattern="n s -> n t s",
                 t=data_mask.size(1),
             )
 
@@ -282,20 +261,16 @@ class TransformerEncoder(nn.Module):
         return output
 
 
-
 class TransformerDecoderLayer(nn.Module):
-
-
     def __init__(
         self,
         model_dim: int,
         num_heads: int,
         widening_factor: int,
         dropout_p: float = 0,
-        self_attn: bool = True
+        self_attn: bool = True,
     ) -> None:
-        """
-        """
+        """ """
         super().__init__()
         if self_attn:
             self.self_attn = SelfAttentionBlock(
@@ -325,8 +300,7 @@ class TransformerDecoderLayer(nn.Module):
         self_attn_mask: Tensor | None,
         cross_attn_mask: Tensor | None,
     ) -> Tensor:
-        """
-        """
+        """ """
         output = target
         if self.self_attn is not None:
             output = self.self_attn(
@@ -346,10 +320,8 @@ class TransformerDecoderLayer(nn.Module):
         return output
 
 
-
 class TransformerDecoder(nn.Module):
-    """Transformer encoder
-    """
+    """Transformer encoder"""
 
     def __init__(
         self,
@@ -360,8 +332,7 @@ class TransformerDecoder(nn.Module):
         dropout_p: float = 0,
         self_attn: bool = True,
     ) -> None:
-        """
-        """
+        """ """
         super().__init__()
 
         self._do_self_attn = self_attn
@@ -381,7 +352,7 @@ class TransformerDecoder(nn.Module):
             return None
         return eo.repeat(
             tensor=target_data_mask,
-            pattern='n s -> n t s',
+            pattern="n s -> n t s",
             t=target_data_mask.size(1),
         )
 
@@ -390,14 +361,13 @@ class TransformerDecoder(nn.Module):
         source_data_mask: Tensor | None,
         target_len: int,
     ) -> Tensor | None:
-        """
-        """
+        """ """
         if source_data_mask is None:
             return None
         # n: batch size, s: source array length, t: target array length
         attn_mask = eo.repeat(
             tensor=source_data_mask,
-            pattern='n s -> n t s',
+            pattern="n s -> n t s",
             t=target_len,
         )
         return attn_mask
@@ -409,8 +379,7 @@ class TransformerDecoder(nn.Module):
         target_data_mask: Tensor | None = None,
         source_data_mask: Tensor | None = None,
     ) -> Tensor:
-        """
-        """
+        """ """
         self_attn_mask = self._make_self_attn_mask(target_data_mask)
         cross_attn_mask = self._make_cross_attn_mask(source_data_mask, target.size(1))
 

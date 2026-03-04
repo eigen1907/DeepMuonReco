@@ -3,8 +3,8 @@ import torch.nn as nn
 
 
 __all__ = [
-    'MaskedSelect',
-    'MaskedMean',
+    "MaskedSelect",
+    "MaskedMean",
 ]
 
 # class MaskedSelect(nn.Module):
@@ -23,12 +23,10 @@ __all__ = [
 
 
 class MaskedSelect(nn.Module):
-
     def forward(self, mask: Tensor, input: Tensor) -> Tensor:
         return input.masked_select(mask)
 
 
 class MaskedMean(nn.Module):
-
     def forward(self, mask: Tensor, input: Tensor) -> Tensor:
         return input.masked_select(mask).mean()

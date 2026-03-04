@@ -11,7 +11,7 @@ import tqdm.rich
 
 
 __all__ = [
-    'TrackerTrackSelectionDataset',
+    "TrackerTrackSelectionDataset",
 ]
 
 
@@ -19,7 +19,6 @@ _logger = getLogger(__name__)
 
 
 class Compose:
-
     def __init__(self, transforms):
         self.transforms = transforms
 
@@ -38,8 +37,6 @@ class Compose:
 
 
 class TrackerTrackSelectionDataset(Dataset):
-
-
     def __init__(
         self,
         path: str | Path,
@@ -49,7 +46,7 @@ class TrackerTrackSelectionDataset(Dataset):
         gem_segment_feature_list: list[str] | None,
         rpc_hit_feature_list: list[str] | None,
         gem_hit_feature_list: list[str] | None,
-        target_key: str = 'track_is_trk_muon',
+        target_key: str = "track_is_trk_muon",
         max_events: int | float | None = None,
     ) -> None:
         super().__init__()
@@ -65,9 +62,9 @@ class TrackerTrackSelectionDataset(Dataset):
 
         path = Path(path)
 
-        if path.suffix == '.root':
+        if path.suffix == ".root":
             loader = self.from_root
-        elif path.suffix in ['.h5', '.hdf5']:
+        elif path.suffix in [".h5", ".hdf5"]:
             loader = self.from_hdf5
         else:
             raise ValueError(f"Unsupported file format: {path.suffix}")
@@ -109,7 +106,6 @@ class TrackerTrackSelectionDataset(Dataset):
 
         return stop
 
-
     @classmethod
     def from_root(
         cls,
@@ -121,8 +117,8 @@ class TrackerTrackSelectionDataset(Dataset):
         rpc_hit_feature_list: list[str] | None,
         gem_hit_feature_list: list[str] | None,
         max_events: int | float | None,
-        target_key: str = 'track_is_trk_muon',
-        treepath: str = 'deepMuonRecoNtuplizer/tree',
+        target_key: str = "track_is_trk_muon",
+        treepath: str = "deepMuonRecoNtuplizer/tree",
     ) -> list[TensorDict]:
         raise NotImplementedError("Root file loading is not implemented yet.")
 
@@ -137,7 +133,7 @@ class TrackerTrackSelectionDataset(Dataset):
         gem_segment_feature_list: list[str] | None,
         rpc_hit_feature_list: list[str] | None,
         gem_hit_feature_list: list[str] | None,
-        target_key: str = 'track_is_trk_muon',
+        target_key: str = "track_is_trk_muon",
     ) -> list[TensorDict]:
         """
         For the HDF5 files, we assume that event cleaning has already been
@@ -145,74 +141,73 @@ class TrackerTrackSelectionDataset(Dataset):
         the muon detector have been removed. We also assume that px and py of
         each track are precomputed and stored.
         """
+
         def stack_features(feature_list: list[np.ndarray]) -> list[torch.Tensor]:
             return [
                 torch.from_numpy(np.stack(each, axis=1, dtype=np.float32))
                 for each in zip(*feature_list)
             ]
 
-        with h5.File(path, 'r') as file:
-            total = len(file[next(iter(file.keys()))]) # type: ignore
+        with h5.File(path, "r") as file:
+            total = len(file[next(iter(file.keys()))])  # type: ignore
             stop = cls._get_stop(max_events=max_events, total=total)
 
             chunk = {}
 
             # NOTE: reconstructed tracker tracks
-            chunk['tracker_track'] = [
-                file[f'track_{each}'][:stop] # type: ignore
+            chunk["tracker_track"] = [
+                file[f"track_{each}"][:stop]  # type: ignore
                 for each in tracker_track_feature_list
             ]
 
             # NOTE: reconstructed segments in the muon system
-            chunk['dt_segment'] = [
-                file[f'dt_seg_{each}'][:stop] # type: ignore
+            chunk["dt_segment"] = [
+                file[f"dt_seg_{each}"][:stop]  # type: ignore
                 for each in dt_segment_feature_list
             ]
 
-            chunk['csc_segment'] = [
-                file[f'csc_seg_{each}'][:stop] # type: ignore
+            chunk["csc_segment"] = [
+                file[f"csc_seg_{each}"][:stop]  # type: ignore
                 for each in csc_segment_feature_list
             ]
 
             if gem_segment_feature_list is not None:
-                chunk['gem_segment'] = [
-                    file[f'gem_seg_{each}'][:stop] # type: ignore
+                chunk["gem_segment"] = [
+                    file[f"gem_seg_{each}"][:stop]  # type: ignore
                     for each in gem_segment_feature_list
                 ]
 
             # NOTE: reconstructed hits in the muon system
             if rpc_hit_feature_list is not None:
-                chunk['rpc_hit'] = [
-                    file[f'rpc_hit_{each}'][:stop] # type: ignore
+                chunk["rpc_hit"] = [
+                    file[f"rpc_hit_{each}"][:stop]  # type: ignore
                     for each in rpc_hit_feature_list
                 ]
 
             if gem_hit_feature_list is not None:
-                chunk['gem_hit'] = [
-                    file[f'gem_hit_{each}'][:stop] # type: ignore
+                chunk["gem_hit"] = [
+                    file[f"gem_hit_{each}"][:stop]  # type: ignore
                     for each in gem_hit_feature_list
                 ]
 
-            chunk['target'] = [
+            chunk["target"] = [
                 torch.from_numpy(each.astype(np.float32))
-                for each in file[target_key][:stop] # type: ignore
+                for each in file[target_key][:stop]  # type: ignore
             ]
 
-
-        key_list_for_stack = ['tracker_track', 'dt_segment', 'csc_segment']
+        key_list_for_stack = ["tracker_track", "dt_segment", "csc_segment"]
         if gem_segment_feature_list is not None:
-            key_list_for_stack.append('gem_segment')
+            key_list_for_stack.append("gem_segment")
         if rpc_hit_feature_list is not None:
-            key_list_for_stack.append('rpc_hit')
+            key_list_for_stack.append("rpc_hit")
         if gem_hit_feature_list is not None:
-            key_list_for_stack.append('gem_hit')
+            key_list_for_stack.append("gem_hit")
 
         for key in key_list_for_stack:
             chunk[key] = stack_features(chunk[key])
 
         return [
-            TensorDict(dict(zip(chunk.keys(), each)))
-            for each in zip(*chunk.values())
+            TensorDict(dict(zip(chunk.keys(), each))) for each in zip(*chunk.values())
         ]
 
     def preprocess(self, preprocessing: dict) -> Self:
@@ -223,13 +218,17 @@ class TrackerTrackSelectionDataset(Dataset):
         """
         preprocessing = {key: Compose(value) for key, value in preprocessing.items()}
         # drop if the key is not found in the examples, and log a warning
-        unavailable_keys = [key for key in preprocessing.keys() if key not in self.example_list[0].sorted_keys]
+        unavailable_keys = [
+            key
+            for key in preprocessing.keys()
+            if key not in self.example_list[0].sorted_keys
+        ]
         if len(unavailable_keys) > 0:
-            _logger.warning(f"The following keys in the preprocessing dictionary are not found in the examples and will be ignored: {unavailable_keys}")
+            _logger.warning(
+                f"The following keys in the preprocessing dictionary are not found in the examples and will be ignored: {unavailable_keys}"
+            )
             for key in unavailable_keys:
                 del preprocessing[key]
-
-
 
         for example in tqdm.rich.tqdm(self.example_list):
             for key, transforms in preprocessing.items():
@@ -237,19 +236,18 @@ class TrackerTrackSelectionDataset(Dataset):
 
         return self
 
-
     @classmethod
     def collate(cls, example_list: list[TensorDict]) -> TensorDict:
         # FIXME: tensordict.pad_sequence is probably slower than using torch.nn.utils.rnn.pad_sequence manually
         batch = pad_sequence(example_list, return_mask=True)
         # FIXME:
-        batch['tracker_track_data_mask'] = batch['masks']['tracker_track']
-        batch['dt_segment_data_mask'] = batch['masks']['dt_segment']
-        batch['csc_segment_data_mask'] = batch['masks']['csc_segment']
-        if 'gem_segment' in batch['masks']:
-            batch['gem_segment_data_mask'] = batch['masks']['gem_segment']
-        if 'rpc_hit' in batch['masks']:
-            batch['rpc_hit_data_mask'] = batch['masks']['rpc_hit']
-        if 'gem_hit' in batch['masks']:
-            batch['gem_hit_data_mask'] = batch['masks']['gem_hit']
+        batch["tracker_track_data_mask"] = batch["masks"]["tracker_track"]
+        batch["dt_segment_data_mask"] = batch["masks"]["dt_segment"]
+        batch["csc_segment_data_mask"] = batch["masks"]["csc_segment"]
+        if "gem_segment" in batch["masks"]:
+            batch["gem_segment_data_mask"] = batch["masks"]["gem_segment"]
+        if "rpc_hit" in batch["masks"]:
+            batch["rpc_hit_data_mask"] = batch["masks"]["rpc_hit"]
+        if "gem_hit" in batch["masks"]:
+            batch["gem_hit_data_mask"] = batch["masks"]["gem_hit"]
         return batch

@@ -1,8 +1,7 @@
 r"""
 - https://github.com/google-deepmind/hierarchical_perceiver/blob/b3074a4/perceiver_helpers.py
 """
-import math
-import torch
+
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
@@ -10,13 +9,12 @@ import einops as eo
 
 
 __all__ = [
-    'CrossAttention',
-    'SelfAttention',
+    "CrossAttention",
+    "SelfAttention",
 ]
 
 
 class CrossAttention(nn.Module):
-
     def __init__(
         self,
         embed_dim: int,
@@ -27,14 +25,12 @@ class CrossAttention(nn.Module):
         dropout_p: float = 0,
         bias: bool = True,
     ) -> None:
-        """
-        """
+        """ """
         super().__init__()
-
 
         if embed_dim % num_heads != 0:
             raise ValueError(
-                f'embed_dim ({embed_dim}) must be divisible by num_heads ({num_heads})'
+                f"embed_dim ({embed_dim}) must be divisible by num_heads ({num_heads})"
             )
 
         target_dim = target_dim or embed_dim
@@ -68,11 +64,9 @@ class CrossAttention(nn.Module):
             p=dropout_p,
         )
 
-
     @property
     def dropout_p(self):
         return self._dropout_p if self.training else 0
-
 
     def forward(
         self,
@@ -80,21 +74,20 @@ class CrossAttention(nn.Module):
         source: Tensor,
         attn_mask: Tensor | None,
     ) -> Tensor:
-        """
-        """
+        """ """
         query = self.query_projection(target)
         key = self.key_projection(source)
         value = self.value_projection(source)
 
         query, key, value = [
-            eo.rearrange(each, 'n l (h d) -> n h l d', h=self.num_heads)
+            eo.rearrange(each, "n l (h d) -> n h l d", h=self.num_heads)
             for each in [query, key, value]
         ]
 
         if attn_mask is not None:
             attn_mask = eo.repeat(
                 tensor=attn_mask,
-                pattern='n t s -> n h t s',
+                pattern="n t s -> n h t s",
                 h=self.num_heads,
             )
 
@@ -108,7 +101,7 @@ class CrossAttention(nn.Module):
 
         output = eo.rearrange(
             tensor=output,
-            pattern='n h t d -> n t (h d)',
+            pattern="n h t d -> n t (h d)",
         )
 
         output = self.output_projection(output)
@@ -117,7 +110,6 @@ class CrossAttention(nn.Module):
 
 
 class SelfAttention(CrossAttention):
-
     def __init__(
         self,
         embed_dim: int,
@@ -125,10 +117,9 @@ class SelfAttention(CrossAttention):
         input_dim: int | None = None,
         output_dim: int | None = None,
         dropout_p: float = 0,
-        bias: bool = True
+        bias: bool = True,
     ) -> None:
-        """
-        """
+        """ """
         super().__init__(
             embed_dim=embed_dim,
             num_heads=num_heads,
@@ -139,10 +130,8 @@ class SelfAttention(CrossAttention):
             bias=bias,
         )
 
-    def forward( # type: ignore[override]
-        self,
-        input: Tensor,
-        attn_mask: Tensor | None
+    def forward(  # type: ignore[override]
+        self, input: Tensor, attn_mask: Tensor | None
     ) -> Tensor:
         """
         Args:
@@ -151,8 +140,4 @@ class SelfAttention(CrossAttention):
         Returns:
             output
         """
-        return super().forward(
-            target=input,
-            source=input,
-            attn_mask=attn_mask
-        )
+        return super().forward(target=input, source=input, attn_mask=attn_mask)

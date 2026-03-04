@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-class ToDtype(nn.Module):
 
+class ToDtype(nn.Module):
     dtype_map = {
         "float": torch.float32,
         "float32": torch.float32,
@@ -21,7 +21,9 @@ class ToDtype(nn.Module):
     def __init__(self, dtype: str):
         super().__init__()
         if dtype not in self.dtype_map:
-            raise ValueError(f"Unsupported dtype: {dtype}. Supported dtypes are: {list(self.dtype_map.keys())}")
+            raise ValueError(
+                f"Unsupported dtype: {dtype}. Supported dtypes are: {list(self.dtype_map.keys())}"
+            )
         self.dtype = self.dtype_map[dtype]
 
     def forward(self, input: Tensor) -> Tensor:

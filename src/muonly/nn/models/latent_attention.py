@@ -6,15 +6,13 @@ from ..transformers.transformer import TransformerDecoder
 
 
 __all__ = [
-    'LatentAttentionModel',
+    "LatentAttentionModel",
 ]
 
 
 class LatentAttentionModel(nn.Module):
-
     # TODO: docstring
-    """
-    """
+    """ """
 
     def __init__(
         self,
@@ -46,14 +44,32 @@ class LatentAttentionModel(nn.Module):
         super().__init__()
 
         # tracker track: tt
-        self.tracker_track_embedder = nn.Linear(in_features=tracker_track_dim, out_features=model_dim)
+        self.tracker_track_embedder = nn.Linear(
+            in_features=tracker_track_dim, out_features=model_dim
+        )
 
         # muon detector measurements: mdm
-        self.dt_segment_embedder = nn.Linear(in_features=dt_segment_dim, out_features=model_dim)
-        self.csc_segment_embedder = nn.Linear(in_features=csc_segment_dim, out_features=model_dim)
-        self.gem_segment_embedder = nn.Linear(in_features=gem_segment_dim, out_features=model_dim) if gem_segment_dim is not None else None
-        self.rpc_hit_embedder = nn.Linear(in_features=rpc_hit_dim, out_features=model_dim) if rpc_hit_dim is not None else None
-        self.gem_hit_embedder = nn.Linear(in_features=gem_hit_dim, out_features=model_dim) if gem_hit_dim is not None else None
+        self.dt_segment_embedder = nn.Linear(
+            in_features=dt_segment_dim, out_features=model_dim
+        )
+        self.csc_segment_embedder = nn.Linear(
+            in_features=csc_segment_dim, out_features=model_dim
+        )
+        self.gem_segment_embedder = (
+            nn.Linear(in_features=gem_segment_dim, out_features=model_dim)
+            if gem_segment_dim is not None
+            else None
+        )
+        self.rpc_hit_embedder = (
+            nn.Linear(in_features=rpc_hit_dim, out_features=model_dim)
+            if rpc_hit_dim is not None
+            else None
+        )
+        self.gem_hit_embedder = (
+            nn.Linear(in_features=gem_hit_dim, out_features=model_dim)
+            if gem_hit_dim is not None
+            else None
+        )
 
         self.tracker_track_encoder = PerceiverEncoder(
             latent_len=track_latent_len,
@@ -139,7 +155,9 @@ class LatentAttentionModel(nn.Module):
         tracker_track_embed = self.tracker_track_embedder(tracker_track)
         dt_segment_embed = self.dt_segment_embedder(dt_segment)
         csc_segment_embed = self.csc_segment_embedder(csc_segment)
-        gem_segment_embed = self.gem_segment_embedder(gem_segment) if gem_segment is not None else None
+        gem_segment_embed = (
+            self.gem_segment_embedder(gem_segment) if gem_segment is not None else None
+        )
         rpc_hit_embed = self.rpc_hit_embedder(rpc_hit) if rpc_hit is not None else None
         gem_hit_embed = self.gem_hit_embedder(gem_hit) if gem_hit is not None else None
 

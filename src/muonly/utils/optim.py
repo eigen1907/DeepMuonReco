@@ -22,7 +22,6 @@ def get_parameter_groups(
         )
         return [{"params": list(model.parameters()), "weight_decay": 0.0}]
 
-
     decay_param_list = []
     no_decay_param_list = []
 

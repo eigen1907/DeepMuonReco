@@ -10,11 +10,11 @@ from .transformer import MLPBlock
 
 
 __all__ = [
-    'PerceiverEncoder',
-    'PerceiverProcessor',
-    'PerceiverProcessorBlock',
-    'PerceiverBasicDecoder',
-    'PerceiverLatentQueryDecoder',
+    "PerceiverEncoder",
+    "PerceiverProcessor",
+    "PerceiverProcessorBlock",
+    "PerceiverBasicDecoder",
+    "PerceiverLatentQueryDecoder",
 ]
 
 
@@ -34,8 +34,7 @@ class PerceiverEncoder(nn.Module):
         dropout_p: float = 0,
         bias: bool = False,
     ) -> None:
-        """
-        """
+        """ """
         super().__init__()
 
         self.latent = self._make_latent(latent_len, latent_dim)
@@ -70,10 +69,9 @@ class PerceiverEncoder(nn.Module):
         n = max(1, fan_in)
         s = scale / n
         stddev = math.sqrt(s)
-        stddev = stddev / .87962566103423978
+        stddev = stddev / 0.87962566103423978
         nn.init.trunc_normal_(tensor=latent, mean=0, std=stddev, a=-2, b=+2)
         return nn.Parameter(data=latent)
-
 
     def forward(
         self,
@@ -81,14 +79,13 @@ class PerceiverEncoder(nn.Module):
         data_mask: Tensor | None,
         pre_attention_residual: Tensor | None = None,
     ) -> Tensor:
-        """
-        """
+        """ """
         batch_size = input.size(0)
         latent_len = self.latent.size(0)
 
         latent = eo.repeat(
             tensor=self.latent,
-            pattern='l d -> n l d',
+            pattern="l d -> n l d",
             n=batch_size,
         )
 
@@ -98,7 +95,7 @@ class PerceiverEncoder(nn.Module):
             # n: batch size, s: source array length, t: target array length
             attn_mask = eo.repeat(
                 tensor=data_mask,
-                pattern='n s -> n t s',
+                pattern="n s -> n t s",
                 t=latent_len,
             )
 
@@ -117,19 +114,15 @@ class PerceiverEncoder(nn.Module):
 
 
 class PerceiverProcessor(TransformerEncoderLayer):
-
-
-    def forward( # type: ignore[override]
+    def forward(  # type: ignore[override]
         self,
         latent: Tensor,
     ) -> Tensor:
-        """
-        """
+        """ """
         return super().forward(input=latent, attn_mask=None)
 
 
 class PerceiverProcessorBlock(nn.Module):
-
     def __init__(
         self,
         num_layers: int,
@@ -139,13 +132,14 @@ class PerceiverProcessorBlock(nn.Module):
         dropout_p: float = 0,
         weight_sharing: bool = False,
     ) -> None:
-        """
-        """
+        """ """
         super().__init__()
         if num_layers < 0:
-            raise ValueError(f'num_layers should be a positive integer. got {num_layers}.')
+            raise ValueError(
+                f"num_layers should be a positive integer. got {num_layers}."
+            )
         elif num_layers == 0:
-            warnings.warn('num_layers is 0. the module will be a pass-through.')
+            warnings.warn("num_layers is 0. the module will be a pass-through.")
 
         layer = PerceiverProcessor(
             model_dim=latent_dim,
@@ -163,8 +157,7 @@ class PerceiverProcessorBlock(nn.Module):
         self,
         latent: Tensor,
     ) -> Tensor:
-        """
-        """
+        """ """
         output = latent
         for layer in self.layer_list:
             output = layer(latent=output)
@@ -217,12 +210,11 @@ class PerceiverBasicDecoder(nn.Module):
         query: Tensor,
         query_data_mask: Tensor | None,
     ) -> Tensor:
-        """
-        """
+        """ """
         output: Tensor = self.attention(
             target=query,
             source=latent,
-            attn_mask=None, # FIXME:
+            attn_mask=None,  # FIXME:
         )
         output = self.mlp(
             input=output,
@@ -235,5 +227,4 @@ class PerceiverBasicDecoder(nn.Module):
         return output
 
 
-class PerceiverLatentQueryDecoder(PerceiverEncoder):
-    ...
+class PerceiverLatentQueryDecoder(PerceiverEncoder): ...

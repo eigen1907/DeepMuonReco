@@ -8,15 +8,14 @@ from aim import Image
 
 
 __all__ = [
-    'TensorDictWrapper',
-    'MaskingWrapper',
-    'PlotWrapper',
+    "TensorDictWrapper",
+    "MaskingWrapper",
+    "PlotWrapper",
 ]
 
 
 class TensorDictWrapper(WrapperMetric):
-    """
-    """
+    """ """
 
     def __init__(
         self,
@@ -26,13 +25,13 @@ class TensorDictWrapper(WrapperMetric):
         super().__init__()
 
         if not isinstance(metric, Metric):
-            raise ValueError(f"Expected argument `metric` to be an instance of `torchmetrics.Metric` but got {metric}")
+            raise ValueError(
+                f"Expected argument `metric` to be an instance of `torchmetrics.Metric` but got {metric}"
+            )
         self.metric = metric
         self.in_keys = [
-            each if isinstance(each, str) else tuple(each)
-            for each in in_keys
+            each if isinstance(each, str) else tuple(each) for each in in_keys
         ]
-
 
     def _get_tensors(self, input: TensorDict) -> tuple[Tensor, ...]:
         """
@@ -40,7 +39,9 @@ class TensorDictWrapper(WrapperMetric):
         """
         tensor_list = []
         for in_key in self.in_keys:
-            tensor = input._get_tuple_maybe_non_tensor(key=_unravel_key_to_tuple(in_key), default=None)
+            tensor = input._get_tuple_maybe_non_tensor(
+                key=_unravel_key_to_tuple(in_key), default=None
+            )
 
             if tensor is None:
                 raise RuntimeError(
@@ -65,19 +66,20 @@ class TensorDictWrapper(WrapperMetric):
         self.metric.reset()
 
 
-
-
 class MaskingWrapper(WrapperMetric):
-    """
-    """
+    """ """
 
     def __init__(self, metric: Metric) -> None:
         super().__init__()
         if not isinstance(metric, Metric):
-            raise ValueError(f"Expected argument `metric` to be an instance of `torchmetrics.Metric` but got {metric}")
+            raise ValueError(
+                f"Expected argument `metric` to be an instance of `torchmetrics.Metric` but got {metric}"
+            )
         self.metric = metric
 
-    def _mask_tensors(self, mask: Tensor, *args: Tensor, **kwargs: Tensor) -> tuple[tuple[Tensor, ...], dict[str, Tensor]]:
+    def _mask_tensors(
+        self, mask: Tensor, *args: Tensor, **kwargs: Tensor
+    ) -> tuple[tuple[Tensor, ...], dict[str, Tensor]]:
         args = tuple([each.masked_select(mask) for each in args])
         kwargs = {key: value.masked_select(mask) for key, value in kwargs.items()}
         return args, kwargs
@@ -98,13 +100,14 @@ class MaskingWrapper(WrapperMetric):
 
 
 class PlotWrapper(WrapperMetric):
-    """
-    """
+    """ """
 
     def __init__(self, metric: Metric) -> None:
         super().__init__()
         if not isinstance(metric, Metric):
-            raise ValueError(f"Expected argument `metric` to be an instance of `torchmetrics.Metric` but got {metric}")
+            raise ValueError(
+                f"Expected argument `metric` to be an instance of `torchmetrics.Metric` but got {metric}"
+            )
         self.metric = metric
 
     def forward(self, *args, **kwargs) -> Any:

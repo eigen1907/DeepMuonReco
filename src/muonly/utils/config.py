@@ -13,17 +13,16 @@ _logger = getLogger(__name__)
 
 
 __all__ = [
-    'build_tensordictmodule',
-    'build_tensordictsequential',
-    'build_metric_collection',
+    "build_tensordictmodule",
+    "build_tensordictsequential",
+    "build_metric_collection",
 ]
 
 
 def normalize_keys(
     keys: list[str | list[str]] | dict[str, str],
 ) -> list[str | tuple[str, ...]] | dict[str, str]:
-    """
-    """
+    """ """
     if isinstance(keys, dict):
         output = copy.deepcopy(keys)
     else:
@@ -34,7 +33,7 @@ def normalize_keys(
             elif isinstance(each, (list, ListConfig)):
                 output.append(tuple(each))
             else:
-                raise ValueError(f'{type(each)=}')
+                raise ValueError(f"{type(each)=}")
     return output
 
 
@@ -42,20 +41,21 @@ def build_tensordictmodule(
     config: DictConfig,
     instantiation: bool = True,
 ) -> TensorDictModule:
-    """
-    """
+    """ """
     if instantiation:
-        _logger.debug(f'Instantiating config: {config}')
+        _logger.debug(f"Instantiating config: {config}")
         config = instantiate(config)
 
-    in_keys = normalize_keys(config['in_keys'])
-    out_keys = normalize_keys(config['out_keys'])
+    in_keys = normalize_keys(config["in_keys"])
+    out_keys = normalize_keys(config["out_keys"])
 
-    inplace = config.get('inplace', True)
+    inplace = config.get("inplace", True)
 
-    _logger.debug(f'Building TensorDictModule with {config=}, {in_keys=}, {out_keys=}, {inplace=}')
+    _logger.debug(
+        f"Building TensorDictModule with {config=}, {in_keys=}, {out_keys=}, {inplace=}"
+    )
     return TensorDictModule(
-        module=config['module'],
+        module=config["module"],
         in_keys=in_keys,
         out_keys=out_keys,
         inplace=inplace,
@@ -66,18 +66,17 @@ def build_tensordictsequential(
     config: DictConfig,
     instantiation: bool = True,
 ) -> TensorDictSequential:
-    """
-    """
+    """ """
     if instantiation:
-        _logger.debug(f'Instantiating config: {config}')
+        _logger.debug(f"Instantiating config: {config}")
         config = instantiate(config)
 
-    inplace = config.get('inplace', None)
+    inplace = config.get("inplace", None)
 
     # modules
     modules = OrderedDict()
     for each in config.modules:
-        name = each['name']
+        name = each["name"]
         try:
             # if inplace is False at the top level, propagate to children
             if inplace is False:
@@ -88,12 +87,11 @@ def build_tensordictsequential(
             raise ValueError(f"Error building module {name}: {error}") from error
 
     # other args
-    partial_tolerant = config.get('partial_tolerant', False)
+    partial_tolerant = config.get("partial_tolerant", False)
 
-    selected_out_keys = config.get('selected_out_keys', None)
+    selected_out_keys = config.get("selected_out_keys", None)
     if selected_out_keys is not None:
         selected_out_keys = list(selected_out_keys)
-
 
     return TensorDictSequential(
         modules,
@@ -108,23 +106,21 @@ def build_metric_collection(
     stage: RunningStage,
     instantiation: bool = True,
 ) -> MetricCollection:
-    """
-    """
+    """ """
     if instantiation:
-        _logger.debug(f'Instantiating config: {config}')
+        _logger.debug(f"Instantiating config: {config}")
         config = instantiate(config)
 
     metrics: dict = {
-        key: TensorDictWrapper(**value)
-        for key, value in config.metrics.items()
+        key: TensorDictWrapper(**value) for key, value in config.metrics.items()
     }
 
-    postfix = config.get('postfix', None)
-    compute_groups: bool | list[list[str]] = config.get('compute_groups', True)
+    postfix = config.get("postfix", None)
+    compute_groups: bool | list[list[str]] = config.get("compute_groups", True)
 
     return MetricCollection(
         metrics=metrics,
-        prefix=f'{stage.value}_',
+        prefix=f"{stage.value}_",
         postfix=postfix,
         compute_groups=compute_groups,
     )

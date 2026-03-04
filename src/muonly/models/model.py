@@ -21,8 +21,7 @@ _logger = getLogger(__name__)
 
 
 class Model(LightningModule, abc.ABC):
-    """
-    """
+    """ """
 
     def __init__(
         self,
@@ -52,14 +51,13 @@ class Model(LightningModule, abc.ABC):
         return self.net.module(*args, **kwargs)
 
     @abc.abstractmethod
-    def compute_loss(self, batch: TensorDict) -> Tensor:
-        ...
+    def compute_loss(self, batch: TensorDict) -> Tensor: ...
 
     def training_step(self, batch: TensorDict) -> Tensor:
         """ """
         loss = self.compute_loss(batch)
         loss = loss.mean()
-        self.log(name=f"train_loss", value=loss)
+        self.log(name="train_loss", value=loss)
         return loss
 
     def _eval_step(
@@ -74,9 +72,7 @@ class Model(LightningModule, abc.ABC):
         return batch
 
     @abc.abstractmethod
-    def _update_metrics(
-        self, batch: TensorDict, metrics: MetricCollection
-    ): ...
+    def _update_metrics(self, batch: TensorDict, metrics: MetricCollection): ...
 
     def _on_eval_epoch_end(
         self, metrics: MetricCollection, stage: RunningStage

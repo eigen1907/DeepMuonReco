@@ -12,39 +12,40 @@ from htcondor.htcondor import Schedd
 from coolname import generate_slug
 
 
-PROJECT_NAME = 'muonly'
+PROJECT_NAME = "muonly"
+
 
 def make_exp_name(config_file: Path, **kwargs) -> str:
-    if kwargs.get('debug'):
-        return 'debug'
+    if kwargs.get("debug"):
+        return "debug"
 
-    if exp_name_cli := kwargs.get('exp'):
+    if exp_name_cli := kwargs.get("exp"):
         return exp_name_cli
 
-    with open(config_file, 'r') as file:
+    with open(config_file, "r") as file:
         config = yaml.safe_load(file)
 
-    if exp_name_config := config.get('exp', {}).get('name'):
+    if exp_name_config := config.get("exp", {}).get("name"):
         return exp_name_config
 
-    defaults = config.get('defaults', [])
+    defaults = config.get("defaults", [])
 
-    default_exp = next((item['exp'] for item in defaults if 'exp' in item), None)
+    default_exp = next((item["exp"] for item in defaults if "exp" in item), None)
 
     if default_exp:
-        default_config_file = config_file.parent / 'exp' / f'{default_exp}.yaml'
-        with open(default_config_file, 'r') as file:
+        default_config_file = config_file.parent / "exp" / f"{default_exp}.yaml"
+        with open(default_config_file, "r") as file:
             default_config = yaml.safe_load(file)
-            exp_name_default_config = default_config.get('name')
+            exp_name_default_config = default_config.get("name")
         return exp_name_default_config
 
-    raise ValueError(f'Experiment name not found in {config_file}')
+    raise ValueError(f"Experiment name not found in {config_file}")
 
 
 def make_run_name(run_name: str | None) -> str:
     run_name = run_name or generate_slug(pattern=2)
-    now = datetime.now().strftime('%y%m%d-%H%M%S')
-    return f'{now}_{run_name}'
+    now = datetime.now().strftime("%y%m%d-%H%M%S")
+    return f"{now}_{run_name}"
 
 
 def run(
@@ -62,28 +63,28 @@ def run(
     Args:
     """
 
-    if root_dir := os.getenv('PROJECT_ROOT'):
+    if root_dir := os.getenv("PROJECT_ROOT"):
         root_dir = Path(root_dir).resolve()
     else:
-        raise EnvironmentError('PROJECT_ROOT environment variable is not set')
+        raise EnvironmentError("PROJECT_ROOT environment variable is not set")
 
-    script_file_path = root_dir / 'train.py'
+    script_file_path = root_dir / "train.py"
     if not script_file_path.exists():
-        raise FileNotFoundError(f'Script file not found: {script_file_path}')
+        raise FileNotFoundError(f"Script file not found: {script_file_path}")
 
-    config_dir = root_dir / 'config'
+    config_dir = root_dir / "config"
     if not config_dir.exists():
-        raise FileNotFoundError(f'Config directory not found: {config_dir}')
+        raise FileNotFoundError(f"Config directory not found: {config_dir}")
 
-    config_file = (config_dir / config_name).with_suffix('.yaml')
+    config_file = (config_dir / config_name).with_suffix(".yaml")
     if not config_file.exists():
-        raise FileNotFoundError(f'Config file not found: {config_file}')
+        raise FileNotFoundError(f"Config file not found: {config_file}")
 
-    if executable := shutil.which('python'):
+    if executable := shutil.which("python"):
         executable = Path(executable)
     else:
-        raise FileNotFoundError('Python executable not found in PATH')
-    print(f'{executable=}')
+        raise FileNotFoundError("Python executable not found in PATH")
+    print(f"{executable=}")
 
     exp_name = make_exp_name(config_file, **kwargs)
     run_name = make_run_name(run_name)
@@ -91,107 +92,125 @@ def run(
     # NOTE: arguments
     arg_list = [
         str(script_file_path),
-        '-cd', config_dir,
-        '-cn', config_name,
+        "-cd",
+        config_dir,
+        "-cn",
+        config_name,
     ]
 
     for key, value in kwargs.items():
         if value is not None:
-            arg_list.append(f'{key}={value}')
+            arg_list.append(f"{key}={value}")
 
     arg_list += [
-        f'exp.name={exp_name}',
-        f'run.name={run_name}',
-        f'trainer.devices={gpus}',
-        f'datamodule.num_workers={cpus - 1}', # FIXME:
+        f"exp.name={exp_name}",
+        f"run.name={run_name}",
+        f"trainer.devices={gpus}",
+        f"datamodule.num_workers={cpus - 1}",  # FIXME:
     ]
 
     if extra_args is not None:
         arg_list += shlex.split(extra_args)
 
-    arguments = ' '.join(map(str, arg_list))
-    print(f'{arguments=}')
+    arguments = " ".join(map(str, arg_list))
+    print(f"{arguments=}")
 
     # NOTE: condor logs
-    condor_log_dir = root_dir / 'logs' / exp_name / run_name
+    condor_log_dir = root_dir / "logs" / exp_name / run_name
     condor_log_dir.mkdir(parents=True, exist_ok=True)
-    condor_log_path = condor_log_dir / 'condor'
+    condor_log_path = condor_log_dir / "condor"
 
     if run_description is not None:
-        description_file_path = condor_log_dir / 'description.txt'
-        with open(description_file_path, 'w') as stream:
+        description_file_path = condor_log_dir / "description.txt"
+        with open(description_file_path, "w") as stream:
             stream.write(run_description)
 
-    job_batch_name = f'{PROJECT_NAME}.{exp_name}'
+    job_batch_name = f"{PROJECT_NAME}.{exp_name}"
 
-    requirements = '||'.join([f'(machine=="{each}.sscc.uos")' for each in node_list])
-    print(f'{requirements=}')
+    requirements = "||".join([f'(machine=="{each}.sscc.uos")' for each in node_list])
+    print(f"{requirements=}")
 
     raw_submit: dict[str, Any] = {
-        'universe': 'vanilla',
-        'getenv': 'True',
+        "universe": "vanilla",
+        "getenv": "True",
         # job
-        'executable': executable,
-        'arguments': arguments,
+        "executable": executable,
+        "arguments": arguments,
         #
-        'should_transfer_files': 'NO',
+        "should_transfer_files": "NO",
         # resources
-        'request_cpus': cpus,
-        'request_GPUs': gpus,
-        'request_memory': memory,
-        'max_retries': 0,
-        'requirements': requirements, # which nodes to use
+        "request_cpus": cpus,
+        "request_GPUs": gpus,
+        "request_memory": memory,
+        "max_retries": 0,
+        "requirements": requirements,  # which nodes to use
         #
-        'JobBatchName': job_batch_name,
-        'output': condor_log_path.with_suffix('.out'),
-        'error': condor_log_path.with_suffix('.err'),
-        'log': condor_log_path.with_suffix('.log'),
-        'priority': 1000,
+        "JobBatchName": job_batch_name,
+        "output": condor_log_path.with_suffix(".out"),
+        "error": condor_log_path.with_suffix(".err"),
+        "log": condor_log_path.with_suffix(".log"),
+        "priority": 1000,
     }
 
-    submit: dict[str, str] = {
-        key: str(value)
-        for key, value in raw_submit.items()
-    }
+    submit: dict[str, str] = {key: str(value) for key, value in raw_submit.items()}
 
     submit = Submit(submit)
     schedd = Schedd()
     schedd.submit(submit)
 
-    print(f'🚀🚀🚀 submit {job_batch_name}')
-
+    print(f"🚀🚀🚀 submit {job_batch_name}")
 
 
 def main():
-    if root_dir := os.getenv('PROJECT_ROOT'):
+    if root_dir := os.getenv("PROJECT_ROOT"):
         root_dir = Path(root_dir).resolve()
     else:
-        raise EnvironmentError('PROJECT_ROOT environment variable is not set')
+        raise EnvironmentError("PROJECT_ROOT environment variable is not set")
 
-    config_dir = root_dir / 'config'
+    config_dir = root_dir / "config"
     if not config_dir.exists():
-        raise FileNotFoundError(f'Config directory not found: {config_dir}')
+        raise FileNotFoundError(f"Config directory not found: {config_dir}")
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
-    parser.add_argument('-cn', '--config-name', type=str, default='tracker-track-selection', help='config name') # TODO: choices
-    for sub_config_dir in config_dir.glob('*'):
+    parser.add_argument(
+        "-cn",
+        "--config-name",
+        type=str,
+        default="tracker-track-selection",
+        help="config name",
+    )  # TODO: choices
+    for sub_config_dir in config_dir.glob("*"):
         if not sub_config_dir.is_dir():
             continue
-        name_flag = sub_config_dir.name.replace('_', '-')
-        name_help = sub_config_dir.name.replace('_', ' ')
-        parser.add_argument(f'--{name_flag}', type=str, help=f'{name_help} config dir')
+        name_flag = sub_config_dir.name.replace("_", "-")
+        name_help = sub_config_dir.name.replace("_", " ")
+        parser.add_argument(f"--{name_flag}", type=str, help=f"{name_help} config dir")
 
-    parser.add_argument('-a', '--extra-args', type=str, required=False, help='a list of yaml config files')
-    parser.add_argument('-m', '--memory', type=str, default='64GB', help='memory')
+    parser.add_argument(
+        "-a",
+        "--extra-args",
+        type=str,
+        required=False,
+        help="a list of yaml config files",
+    )
+    parser.add_argument("-m", "--memory", type=str, default="64GB", help="memory")
     # TODO: when gpus > 1, update config_file
-    parser.add_argument('--gpus', type=int, default=1, help='the number of GPUs')
-    parser.add_argument('--cpus', type=int, default=3, help='the number of CPUs')
-    parser.add_argument('-n', '--run-name', type=str, help='name of the run')
-    parser.add_argument('-d', '--run-description', type=str, help='description of the run')
-    parser.add_argument('--node', dest='node_list', type=str, nargs='+', default=['gpu01', 'gpu02', 'gpu03'])
+    parser.add_argument("--gpus", type=int, default=1, help="the number of GPUs")
+    parser.add_argument("--cpus", type=int, default=3, help="the number of CPUs")
+    parser.add_argument("-n", "--run-name", type=str, help="name of the run")
+    parser.add_argument(
+        "-d", "--run-description", type=str, help="description of the run"
+    )
+    parser.add_argument(
+        "--node",
+        dest="node_list",
+        type=str,
+        nargs="+",
+        default=["gpu01", "gpu02", "gpu03"],
+    )
     args = parser.parse_args()
 
     run(**vars(args))
