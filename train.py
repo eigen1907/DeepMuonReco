@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
 from pathlib import Path
+import warnings
 from aim.pytorch_lightning import AimLogger
 import hydra
 from hydra.utils import instantiate
@@ -10,6 +11,7 @@ from lightning import seed_everything
 from omegaconf import DictConfig
 from omegaconf import OmegaConf
 from coolname.impl import generate_slug
+from tqdm import TqdmExperimentalWarning
 from muonly.nn.utils import init_params
 from muonly.utils.logging import log_everything
 
@@ -17,8 +19,10 @@ from muonly.utils.logging import log_everything
 _logger = logging.getLogger(__name__)
 
 # FIXME: config?
-for logger_name in ["lightning", "matplotlib", "PIL", "aim", "filelock"]:
+for logger_name in ["lightning", "matplotlib", "PIL", "aim", "filelock", "fsspec"]:
     logging.getLogger(logger_name).setLevel(logging.WARNING)
+
+warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
 
 OmegaConf.register_new_resolver(
     "slug",
