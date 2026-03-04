@@ -1,11 +1,13 @@
 from pathlib import Path
 from logging import getLogger
+from typing import Self
 import h5py as h5
 import numpy as np
 import torch
 from torch.utils.data import Dataset
 from tensordict import TensorDict
 from tensordict import pad_sequence
+import tqdm.rich
 
 
 __all__ = [
@@ -14,6 +16,25 @@ __all__ = [
 
 
 _logger = getLogger(__name__)
+
+
+class Compose:
+
+    def __init__(self, transforms):
+        self.transforms = transforms
+
+    def __call__(self, img):
+        for t in self.transforms:
+            img = t(img)
+        return img
+
+    def __repr__(self) -> str:
+        format_string = self.__class__.__name__ + "("
+        for t in self.transforms:
+            format_string += "\n"
+            format_string += f"    {t}"
+        format_string += "\n)"
+        return format_string
 
 
 class TrackerTrackSelectionDataset(Dataset):
@@ -68,7 +89,6 @@ class TrackerTrackSelectionDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.example_list)
-
 
     @classmethod
     def _get_stop(cls, max_events: int | float | None, total: int) -> int | None:
@@ -194,6 +214,29 @@ class TrackerTrackSelectionDataset(Dataset):
             TensorDict(dict(zip(chunk.keys(), each)))
             for each in zip(*chunk.values())
         ]
+
+    def preprocess(self, preprocessing: dict) -> Self:
+        """Apply preprocessing transforms to all examples in-place.
+
+        Args:
+            preprocessing (dict): A dictionary where keys are object name (e.g., 'tracker_track', 'dt_segment', etc.) and values are lists of transforms to apply to that object.
+        """
+        preprocessing = {key: Compose(value) for key, value in preprocessing.items()}
+        # drop if the key is not found in the examples, and log a warning
+        unavailable_keys = [key for key in preprocessing.keys() if key not in self.example_list[0].sorted_keys]
+        if len(unavailable_keys) > 0:
+            _logger.warning(f"The following keys in the preprocessing dictionary are not found in the examples and will be ignored: {unavailable_keys}")
+            for key in unavailable_keys:
+                del preprocessing[key]
+
+
+
+        for example in tqdm.rich.tqdm(self.example_list):
+            for key, transforms in preprocessing.items():
+                example[key] = transforms(example[key])
+
+        return self
+
 
     @classmethod
     def collate(cls, example_list: list[TensorDict]) -> TensorDict:

@@ -1,0 +1,16 @@
+_target_: muonly.nn.VanillaTransformerModel
+
+tracker_track_dim: null
+dt_segment_dim: null
+csc_segment_dim: null
+gem_segment_dim: null
+rpc_hit_dim: null
+gem_hit_dim: null
+output_dim: null
+
+model_dim: 64 # Dimension of the model embeddings
+feedforward_dim: 256 # Dimension of the feed-forward network
+activation: gelu # Activation function (e.g., 'gelu', 'relu')
+num_heads: 8 # Number of heads for multi-head attention
+num_layers: 4 # Number of transformer layers
+dropout: 0.1 # Dropout probability

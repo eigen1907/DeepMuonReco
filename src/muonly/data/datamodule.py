@@ -44,6 +44,8 @@ class DataModule(LightningDataModule):
         num_workers: int = 0,
         pin_memory: bool = True,
         #
+        preprocessing: dict | None = None,
+        #
         train_max_events: int | None = None,
         val_max_events: int | None = None,
         test_max_events: int | None = None,
@@ -89,6 +91,9 @@ class DataModule(LightningDataModule):
                 max_events=self.hparams[f'{prefix}_max_events'],
                 **kwargs,
             )
+
+        preprocessing = self.hparams['preprocessing']
+        dataset.preprocess(preprocessing)
 
         # logging the dataset, the number of examples  for debugging
         _logger.info(f'Loaded {prefix} set with {len(dataset)} examples in {elapsed_time():.2f} seconds')

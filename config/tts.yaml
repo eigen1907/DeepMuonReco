@@ -3,21 +3,29 @@
 defaults:
   - torch: default
   - hydra: default
-  - exp: tracker_track_selection
   - paths: default
-  - feature_set: pqv
+  - run: default
+
+  - data: pqv
   - datamodule: default
-  - augmentation: none
-  - preprocessing: tracker-track-log_minmax
-  - model: latent_attention
-  - postprocessing: default
-  - criterion: bce
-  - optimizer: adamw
-  - lr_scheduler: plateau
-  - metric: default
+
+  - model: tts
+  - net: latent_attention
+
+  - optim: default
+
   - trainer: gpu_16-mixed
   - callbacks: default
   - logger: aim
-  - run: default
+
   - _self_
+
   - debug: null
+
+exp:
+  name: tracker_track_selection
+  target_dim: 1
+  target_key: track_is_trk_muon
+
+model:
+  pos_weight: 150.0

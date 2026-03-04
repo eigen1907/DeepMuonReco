@@ -1,0 +1,11 @@
+lr: 3.0e-4
+weight_decay: 0.01
+beta1: 0.9
+beta2: 0.999
+
+warmup:
+  frac_steps: 0.05
+  start_factor: 0.01
+
+cosine:
+  eta_min_factor: 0.01

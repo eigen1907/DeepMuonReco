@@ -1,53 +1,49 @@
 # @package _global_
 
-
 defaults:
   - torch: default
   - hydra: default
-  - exp: tracker_track_selection
   - paths: default
-  - feature_set: pqv
+  - run: default
+
+  - data: pqv
   - datamodule: default
-  - augmentation: none
-  - preprocessing: tracker-track-log_minmax
-  - model: latent_attention
-  - postprocessing: default
-  - criterion: bce
-  - optimizer: adamw
-  - lr_scheduler: plateau
-  - metric: default
+
+  - model: tts
+  - net: latent_attention
+
+  - optim: default
+
   - trainer: gpu_16-mixed
   - callbacks: default
   - logger: aim
-  - run: default
+
   - _self_
+
   - debug: null
 
-feature_set:
-  gem_segment : null # no GEM segments in Run 3
+exp:
+  name: tracker_track_selection_run3
+  target_dim: 1
+  target_key: track_is_trk_muon
 
-preprocessing:
-  partial_tolerant: true
+data:
+  gem_segment: null
 
 model:
-  gem_segment_dim: null
+  pos_weight: 30.0
 
   in_keys:
-    tracker_track_prep: tracker_track
-    tracker_track_data_mask: tracker_track_data_mask
-    dt_segment_prep: dt_segment
-    dt_segment_data_mask: dt_segment_data_mask
-    csc_segment_prep: csc_segment
-    csc_segment_data_mask: csc_segment_data_mask
-    rpc_hit_prep: rpc_hit
-    rpc_hit_data_mask: rpc_hit_data_mask
-    gem_hit_prep: gem_hit
-    gem_hit_data_mask: gem_hit_data_mask
-
-exp:
-  name: tracker-track-selection_run3
-  target_key: is_tracker_muon
-  pos_weight: 30.0
+    - tracker_track
+    - tracker_track_data_mask
+    - dt_segment
+    - dt_segment_data_mask
+    - csc_segment
+    - csc_segment_data_mask
+    - rpc_hit
+    - rpc_hit_data_mask
+    - gem_hit # GE11, GE21
+    - gem_hit_data_mask
 
 paths:
   data_dir: /hdfs/ml/muonly/data/CMSSW_14_0_21_patch1/mu2024pu/

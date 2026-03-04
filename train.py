@@ -13,7 +13,6 @@ from lightning import seed_everything
 from omegaconf import DictConfig
 from omegaconf import OmegaConf
 from coolname import generate_slug
-from muonly.model import Model
 from muonly.nn.utils import init_params
 
 
@@ -41,7 +40,7 @@ OmegaConf.register_new_resolver(
 
 @hydra.main(
     config_path='./config',
-    config_name='tracker-track-selection',
+    config_name='tts',
     version_base=None,
 )
 def main(config: DictConfig):
@@ -60,13 +59,11 @@ def main(config: DictConfig):
 
     seed_everything(seed=config.run.seed, workers=True)
 
-    model = Model.from_config(config=config)
+    model = instantiate(config.model)
     _logger.debug(f'{model=}')
-    _logger.info(f'{model.model=}')
-    _logger.info(f'{model.num_params=}')
 
     _logger.info('Initializing model weights')
-    model.model.apply(init_params)
+    model.apply(init_params)
 
     callback_dict = instantiate(config.callbacks)
     logger = instantiate(config.logger)
@@ -95,7 +92,7 @@ def main(config: DictConfig):
         logger.experiment.set(
             key='model',
             val={
-                'num_params': model.num_params,
+                'num_parameters': model.num_parameters,
             }
         )
         for tag in config.run.tags:

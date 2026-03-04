@@ -9,12 +9,20 @@ val_file: val.h5
 test_file: val.h5
 predict_file: val.h5
 
-tracker_track_feature_list: ${feature_set.tracker_track}
-dt_segment_feature_list: ${feature_set.dt_segment}
-csc_segment_feature_list: ${feature_set.csc_segment}
-gem_segment_feature_list: ${feature_set.gem_segment}
-rpc_hit_feature_list: ${feature_set.rpc_hit}
-gem_hit_feature_list: ${feature_set.gem_hit}
+tracker_track_feature_list: ${data.tracker_track.features}
+dt_segment_feature_list: ${data.dt_segment.features}
+csc_segment_feature_list: ${data.csc_segment.features}
+gem_segment_feature_list: ${data.gem_segment.features}
+rpc_hit_feature_list: ${data.rpc_hit.features}
+gem_hit_feature_list: ${data.gem_hit.features}
+
+preprocessing:
+  tracker_track: ${data.tracker_track.preprocessing}
+  dt_segment: ${data.dt_segment.preprocessing}
+  csc_segment: ${data.csc_segment.preprocessing}
+  gem_segment: ${data.gem_segment.preprocessing}
+  rpc_hit: ${data.rpc_hit.preprocessing}
+  gem_hit: ${data.gem_hit.preprocessing}
 
 target_key: ${exp.target_key}
 
