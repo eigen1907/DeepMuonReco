@@ -1,12 +1,37 @@
 import torch
 import torch.nn as nn
 from torch import Tensor
-from ..utils import make_cross_attn_mask, make_self_attn_mask
+import einops as eo
 
 
 __all__ = [
     "VanillaTransformerModel",
 ]
+
+
+def make_cross_attn_mask(
+    source_pad_mask: Tensor,
+    target_pad_mask: Tensor,
+    num_heads: int,
+) -> Tensor:
+    target_len = target_pad_mask.size(1)
+
+    attn_mask = eo.repeat(
+        tensor=source_pad_mask,
+        pattern="n s -> (n h) t s",
+        h=num_heads,
+        t=target_len,
+    )
+    return attn_mask
+
+
+def make_self_attn_mask(
+    pad_mask: Tensor,
+    num_heads: int,
+) -> Tensor:
+    return make_cross_attn_mask(
+        source_pad_mask=pad_mask, target_pad_mask=pad_mask, num_heads=num_heads
+    )
 
 
 class VanillaTransformerModel(nn.Module):
