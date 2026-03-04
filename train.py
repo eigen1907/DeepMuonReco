@@ -2,6 +2,7 @@
 import logging
 from pathlib import Path
 import warnings
+import secrets
 from aim.pytorch_lightning import AimLogger
 import hydra
 from hydra.utils import instantiate
@@ -34,6 +35,11 @@ OmegaConf.register_new_resolver(
 OmegaConf.register_new_resolver(
     name="eval",
     resolver=eval,
+)
+
+OmegaConf.register_new_resolver(
+    name="randbits",
+    resolver=secrets.randbits,
 )
 
 

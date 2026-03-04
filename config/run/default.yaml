@@ -8,4 +8,4 @@ fit: true
 test: true
 predict: false
 
-seed: null
+seed: ${randbits:32}
