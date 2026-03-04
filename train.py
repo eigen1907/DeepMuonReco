@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-from socket import gethostname
-from getpass import getuser
-import sys
-from logging import getLogger, WARNING
+import logging
 from pathlib import Path
 from aim.pytorch_lightning import AimLogger
 import hydra
@@ -17,11 +14,11 @@ from muonly.nn.utils import init_params
 from muonly.utils.logging import log_everything
 
 
-_logger = getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 # FIXME: config?
 for logger_name in ["lightning", "matplotlib", "PIL", "aim", "filelock"]:
-    getLogger(logger_name).setLevel(WARNING)
+    logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 OmegaConf.register_new_resolver(
     "slug",
@@ -42,11 +39,6 @@ OmegaConf.register_new_resolver(
     version_base=None,
 )
 def main(config: DictConfig):
-    _logger.info(" ".join(sys.argv))
-    _logger.info(f"Host: {gethostname()}")
-    _logger.info(f"User: {getuser()}")
-    _logger.info(f"CWD: {Path.cwd()}")
-
     output_dir = Path(config.paths.run_dir)
     with open(output_dir / "config.yaml", "w") as stream:
         OmegaConf.save(config=config, f=stream)
