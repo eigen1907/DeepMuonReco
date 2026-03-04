@@ -82,13 +82,13 @@ def main(config: DictConfig):
 
     if config.run.test:
         # `test` phase is supposed be run with the full validation dataset
-        trainer.test(model=model, datamodule=datamodule, ckpt_path="best")
+        trainer.test(model=model, datamodule=datamodule, ckpt_path="best", weights_only=False)
     else:
         _logger.info(f"Skipping testing as per {config.run.test=}")
 
     if config.run.predict:
         # `predict` phase is supposed be run with the full test dataset
-        trainer.predict(model=model, datamodule=datamodule, ckpt_path="best")
+        trainer.predict(model=model, datamodule=datamodule, ckpt_path="best", weights_only=False)
     else:
         _logger.info(f"Skipping predicting as per {config.run.predict=}")
 
