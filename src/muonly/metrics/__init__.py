@@ -1,1 +1,1 @@
-from .wrappers import *
+from .histogram import *

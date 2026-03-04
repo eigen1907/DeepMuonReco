@@ -5,9 +5,15 @@ from torch import Tensor
 import torch.nn as nn
 from tensordict import TensorDict
 from tensordict.nn import TensorDictModule
-from torchmetrics import MeanMetric, MetricCollection
+from torchmetrics import MetricCollection
+from torchmetrics import MeanMetric
+from torchmetrics.classification import BinaryROC
+from torchmetrics.classification import BinaryAUROC
+import matplotlib.pyplot as plt
+from aim.sdk.objects.image import Image
 
 from .model import Model
+from ..metrics import Histogram
 
 __all__ = [
     "TrackerTrackSelectionModel",
@@ -55,7 +61,11 @@ class TrackerTrackSelectionModel(Model):
         val_metrics = MetricCollection(
             metrics={
                 "loss": MeanMetric(),
-            }
+                "roc": BinaryROC(compute_on_cpu=True),
+                "auroc": BinaryAUROC(compute_on_cpu=True),
+                "score_muon": Histogram(bins=40, range=(0, 1)),
+                "score_bkg": Histogram(bins=40, range=(0, 1)),
+            },
         )
 
         test_metrics = val_metrics.clone()
@@ -83,18 +93,52 @@ class TrackerTrackSelectionModel(Model):
             input=batch["logits"],
             target=batch["target"].float(),
         )
-        loss = loss[batch["tracker_track_data_mask"]]  # FIXME:
-
+        mask = batch["tracker_track_data_mask"]
+        loss = loss[mask]
         return loss  # return the unreduced loss for metric computation
 
     def _update_metrics(self, batch: TensorDict, metrics: MetricCollection):
         loss = self.compute_loss(batch)
+        scores = torch.sigmoid(batch["logits"])
+        target = batch["target"].long()
 
         metrics["loss"].update(loss)
+        metrics["roc"].update(preds=scores, target=target)
+        metrics["auroc"].update(preds=scores, target=target)
+        metrics["score_muon"].update(scores[target == 1])
+        metrics["score_bkg"].update(scores[target == 0])
 
     def _compute_metrics(
         self, metrics: MetricCollection, stage_prefix: str
     ) -> dict[str, Any]:
-        log_dict = {}
-        log_dict["loss"] = metrics["loss"].compute()
-        return log_dict
+        output = {}
+        output["loss"] = metrics["loss"].compute()
+        output["auroc"] = metrics["auroc"].compute()
+
+        # NOTE:
+        fpr, tpr, thresholds = metrics["roc"].compute()
+        fpr = fpr.cpu().numpy()
+        tpr = tpr.cpu().numpy()
+        tnr = 1 - fpr
+        auc = metrics["auroc"].compute().item()
+
+        fig, ax = plt.subplots()
+        ax.plot(tpr, tnr, label=f"AUC={auc:.4f}")
+        ax.plot([0, 1], [1, 0], label="Random", color="gray", linestyle="--")
+        ax.set_xlabel("True Positive Rate")
+        ax.set_ylabel("True Negative Rate")
+        ax.legend()
+        fig.tight_layout()
+        output['roc_curve'] = Image(fig)
+
+        # NOTE: model response
+        fig, ax = plt.subplots()
+        metrics['score_bkg'].plot(ax=ax, label='Background', density=True, color='tab:blue', lw=2)
+        metrics['score_muon'].plot(ax=ax, label='Muon', density=True, color='tab:orange', lw=2)
+        ax.set_xlabel("Score")
+        ax.set_ylabel("Density")
+        ax.legend()
+        fig.tight_layout()
+        output["score"] = Image(fig)
+
+        return output

@@ -11,6 +11,7 @@ from tensordict import TensorDict
 from torchmetrics import MetricCollection
 from aim.pytorch_lightning import AimLogger
 from aim.storage.object import CustomObject
+import matplotlib.pyplot as plt
 from omegaconf import OmegaConf
 
 # monster
@@ -48,6 +49,10 @@ class Model(LightningModule, abc.ABC):
     # Forward and evaluation steps
     ############################################################################
     def forward(self, *args: Tensor | None, **kwargs: Tensor | None) -> Tensor:
+        """
+        forward method simply delegates to the underlying net, which is expected to be a TensorDictModule,
+        so that it can be easily exported to ONNX and TorchScript
+        """
         return self.net.module(*args, **kwargs)
 
     @abc.abstractmethod
@@ -85,8 +90,13 @@ class Model(LightningModule, abc.ABC):
             metrics.reset()
             return
 
-        log_dict = self._compute_metrics(metrics, prefix)
-        log_dict = {f"{prefix}_{key}": value for key, value in log_dict.items()}
+        outout = self._compute_metrics(metrics, prefix)
+
+        log_dict = {}
+        self._log(key=prefix, value=outout, log_dict=log_dict)
+
+        plt.close("all") # close all figures to prevent memory leak in AimLogger
+
         self.log_dict(log_dict)
         metrics.reset()
 
@@ -134,6 +144,7 @@ class Model(LightningModule, abc.ABC):
             context=context,
         )
 
+    # FIXME: rename
     def _log(self, key: str, value: Any, log_dict: dict) -> None:
         if isinstance(value, CustomObject):
             if isinstance(self.logger, AimLogger):
