@@ -12,18 +12,16 @@ from lightning.pytorch import LightningDataModule, Trainer
 from lightning import seed_everything
 from omegaconf import DictConfig
 from omegaconf import OmegaConf
-from coolname import generate_slug
+from coolname.impl import generate_slug
 from muonly.nn.utils import init_params
+from muonly.utils.logging import log_everything
 
 
 _logger = getLogger(__name__)
 
 # FIXME: config?
-getLogger("matplotlib").setLevel(WARNING)
-getLogger("PIL").setLevel(WARNING)
-getLogger("aim").setLevel(WARNING)
-getLogger("filelock").setLevel(WARNING)
-
+for logger_name in ["lightning", "matplotlib", "PIL", "aim", "filelock"]:
+    getLogger(logger_name).setLevel(WARNING)
 
 OmegaConf.register_new_resolver(
     "slug",
@@ -75,38 +73,7 @@ def main(config: DictConfig):
     datamodule: LightningDataModule = instantiate(config.datamodule)
 
     if isinstance(logger, AimLogger):
-        logger.experiment.name = config.run.name
-
-        logger.experiment.set(
-            key="config",
-            val=OmegaConf.to_container(config),  # type: ignore
-        )
-        logger.experiment.set(
-            key="env",
-            val={
-                "host": gethostname(),
-                "cwd": str(Path.cwd()),
-                "user": getuser(),
-            },
-        )
-        logger.experiment.set(
-            key="model",
-            val={
-                "num_parameters": model.num_parameters,
-            },
-        )
-        for tag in config.run.tags:
-            logger.experiment.add_tag(tag)
-
-        description_file = output_dir / "description.txt"
-        if description_file.exists():
-            _logger.info(f"Loading description from {description_file}")
-            with open(description_file, "r") as stream:
-                description = stream.read()
-            _logger.info(f"{description=}")
-            logger.experiment.description = description
-        elif description := config.run.description:
-            logger.experiment.description = description
+        log_everything(logger=logger, config=config, model=model, output_dir=output_dir)
 
     if config.run.pre_fit_validation:
         # `validate` phase is supposed be run with the partial or full validation dataset
