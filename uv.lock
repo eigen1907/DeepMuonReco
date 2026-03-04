@@ -1669,6 +1669,31 @@ wheels = [
 ]
 
 [[package]]
+name = "mplhep"
+version = "1.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "mplhep-data" },
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "uhi" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0d/1c/b5d43b8d42f3e91156d7bc1e0d6e5dfa82d36d85ae15d9ccb52f0e19881c/mplhep-1.1.2.tar.gz", hash = "sha256:d9f94248b1b0fa4a14b42876f838e91804c16331c933c5568ae4a9886c610781", size = 4186042, upload-time = "2026-02-26T22:40:07.363Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a5/10/699c0384f62dd1c4a20e628f772bfc5119865bd57c3b6674b5316f877bc8/mplhep-1.1.2-py3-none-any.whl", hash = "sha256:8afb8834631ef74ad7b7ec9d6c1a196ad879bc680cf89e8d38f669c00329c1c6", size = 96098, upload-time = "2026-02-26T22:40:03.744Z" },
+]
+
+[[package]]
+name = "mplhep-data"
+version = "0.0.5"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ef/73/5009b9a8ffcc68a57c32503042398c390905dc229373b7902ab569d94727/mplhep_data-0.0.5.tar.gz", hash = "sha256:4e5c4eae3e423762eb3d4ad542060f1be7f122c18a17164f7fcfedcf943fac7d", size = 9128431, upload-time = "2025-10-20T14:12:59.724Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b0/6d/aed31732afe53a3c37d1172aef9e1a282106b47e5b0d06bd69b43b59380b/mplhep_data-0.0.5-py3-none-any.whl", hash = "sha256:1b88141a1b9e508845febff56b867fc60531e1d81f9464c468e830d63235abd4", size = 9131833, upload-time = "2025-10-20T14:12:56.092Z" },
+]
+
+[[package]]
 name = "mpmath"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1791,6 +1816,7 @@ dependencies = [
     { name = "hydra-core" },
     { name = "lightning" },
     { name = "matplotlib" },
+    { name = "mplhep" },
     { name = "numpy" },
     { name = "omegaconf" },
     { name = "onnx" },
@@ -1824,6 +1850,7 @@ requires-dist = [
     { name = "hydra-core", specifier = ">=1.3.2" },
     { name = "lightning", specifier = ">=2.5.1" },
     { name = "matplotlib" },
+    { name = "mplhep", specifier = ">=1.1.2" },
     { name = "numpy" },
     { name = "omegaconf", specifier = ">=2.3.0" },
     { name = "onnx" },
