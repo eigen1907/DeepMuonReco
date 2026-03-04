@@ -7,9 +7,9 @@ import argparse
 import shlex
 import shutil
 import yaml
-from htcondor.htcondor import Submit
-from htcondor.htcondor import Schedd
-from coolname import generate_slug
+from htcondor2 import Submit
+from htcondor2 import Schedd
+from coolname.impl import generate_slug
 
 
 PROJECT_NAME = "muonly"
