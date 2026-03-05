@@ -41,7 +41,7 @@ class TrackerTrackSelectionModel(Model):
     ) -> None:
 
         _logger.debug(f"Initializing {self.__class__.__name__} with")
-        _logger.debug(f"  - net ({type(net)}): {net}")
+        _logger.debug(f"  - net ({type(net)})") # do not print the net itself to avoid cluttering the logs
         _logger.debug(f"  - in_keys ({type(in_keys)}): {in_keys}")
         _logger.debug(f"  - optim_config ({type(optim_config)}): {optim_config}")
         _logger.debug(f"  - pos_weight ({type(pos_weight)}): {pos_weight}")
