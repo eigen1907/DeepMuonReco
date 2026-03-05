@@ -4,15 +4,7 @@ import argparse
 import hydra
 from hydra.utils import instantiate
 import torch
-from omegaconf import OmegaConf
-from muonly.model import Model
 from muonly.callbacks import PredictionWriter
-
-
-OmegaConf.register_new_resolver(
-    name="eval",
-    resolver=eval,
-)
 
 
 def run(ckpt_file_path: Path, gpu_id: int):
@@ -37,7 +29,7 @@ def run(ckpt_file_path: Path, gpu_id: int):
     device = torch.device(f"cuda:{gpu_id}")
 
     print("instantiating model...")
-    model = Model.from_config(config=config)
+    model = instantiate(config.model)
 
     print(f"loading checkpoint from {ckpt_file_path}...")
     model.load_state_dict(

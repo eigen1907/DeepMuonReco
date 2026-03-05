@@ -38,7 +38,7 @@ class Model(LightningModule, abc.ABC):
         optim_config = OmegaConf.to_container(optim_config, resolve=True)
         if not isinstance(optim_config, dict):
             raise ValueError(
-                f"Expected optim_config to be a dict, got {type(self.optim_config)}"
+                f"Expected optim_config to be a dict, got {type(optim_config)}"
             )
         self.optim_config = optim_config
 
@@ -90,10 +90,10 @@ class Model(LightningModule, abc.ABC):
             metrics.reset()
             return
 
-        outout = self._compute_metrics(metrics, prefix)
+        output = self._compute_metrics(metrics, prefix)
 
         log_dict = {}
-        self._log(key=prefix, value=outout, log_dict=log_dict)
+        self._log(key=prefix, value=output, log_dict=log_dict)
 
         plt.close("all")  # close all figures to prevent memory leak in AimLogger
 
@@ -206,7 +206,6 @@ class Model(LightningModule, abc.ABC):
                 f"Expected warmup_steps to be int or float, got {type(warmup_steps)}"
             )
 
-        warmup_steps = warmup_steps
         cosine_steps = total_steps - warmup_steps
 
         _logger.info(
