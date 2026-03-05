@@ -18,7 +18,7 @@ import mplhep as mh
 from muonly.nn.utils import init_params
 from muonly.utils.logging import log_everything
 
-mh.style.use('CMS')
+mh.style.use("CMS")
 
 
 if "PROJECT_ROOT" not in os.environ:

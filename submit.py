@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from typing import Any
 from pathlib import Path
 from datetime import datetime
 import argparse
