@@ -18,8 +18,8 @@ from muonly.nn.utils import init_params
 from muonly.utils.logging import log_everything
 
 
-if 'PROJECT_ROOT' not in os.environ:
-    os.environ['PROJECT_ROOT'] = str(Path(__file__).parent.resolve())
+if "PROJECT_ROOT" not in os.environ:
+    os.environ["PROJECT_ROOT"] = str(Path(__file__).parent.resolve())
 
 _logger = logging.getLogger(__name__)
 
@@ -62,7 +62,9 @@ def main(config: DictConfig):
     if config.torch.num_interop_threads is not None:
         torch.set_num_interop_threads(config.torch.num_interop_threads)
     if config.torch.float32_matmul_precision is not None:
-        torch.set_float32_matmul_precision(precision=config.torch.float32_matmul_precision)
+        torch.set_float32_matmul_precision(
+            precision=config.torch.float32_matmul_precision
+        )
 
     seed_everything(seed=config.run.seed, workers=True)
 
@@ -99,13 +101,17 @@ def main(config: DictConfig):
 
     if config.run.test:
         # `test` phase is supposed be run with the full validation dataset
-        trainer.test(model=model, datamodule=datamodule, ckpt_path="best", weights_only=False)
+        trainer.test(
+            model=model, datamodule=datamodule, ckpt_path="best", weights_only=False
+        )
     else:
         _logger.info(f"Skipping testing as per {config.run.test=}")
 
     if config.run.predict:
         # `predict` phase is supposed be run with the full test dataset
-        trainer.predict(model=model, datamodule=datamodule, ckpt_path="best", weights_only=False)
+        trainer.predict(
+            model=model, datamodule=datamodule, ckpt_path="best", weights_only=False
+        )
     else:
         _logger.info(f"Skipping predicting as per {config.run.predict=}")
 

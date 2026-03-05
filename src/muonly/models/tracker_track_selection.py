@@ -11,6 +11,7 @@ from torchmetrics.classification import BinaryROC
 from torchmetrics.classification import BinaryAUROC
 import matplotlib.pyplot as plt
 from aim.sdk.objects.image import Image
+from omegaconf import OmegaConf, ListConfig, DictConfig
 
 from .model import Model
 from ..metrics import Histogram
@@ -21,8 +22,6 @@ __all__ = [
 
 
 _logger = getLogger(__name__)
-
-from omegaconf import OmegaConf, ListConfig, DictConfig
 
 
 def _to_container(x: Any):
@@ -41,7 +40,9 @@ class TrackerTrackSelectionModel(Model):
     ) -> None:
 
         _logger.debug(f"Initializing {self.__class__.__name__} with")
-        _logger.debug(f"  - net ({type(net)})") # do not print the net itself to avoid cluttering the logs
+        _logger.debug(
+            f"  - net ({type(net)})"
+        )  # do not print the net itself to avoid cluttering the logs
         _logger.debug(f"  - in_keys ({type(in_keys)}): {in_keys}")
         _logger.debug(f"  - optim_config ({type(optim_config)}): {optim_config}")
         _logger.debug(f"  - pos_weight ({type(pos_weight)}): {pos_weight}")
@@ -130,12 +131,16 @@ class TrackerTrackSelectionModel(Model):
         ax.set_ylabel("True Negative Rate")
         ax.legend()
         fig.tight_layout()
-        output['roc_curve'] = Image(fig)
+        output["roc_curve"] = Image(fig)
 
         # NOTE: model response
         fig, ax = plt.subplots()
-        metrics['score_bkg'].plot(ax=ax, label='Background', density=True, color='tab:blue', lw=2)
-        metrics['score_muon'].plot(ax=ax, label='Muon', density=True, color='tab:orange', lw=2)
+        metrics["score_bkg"].plot(
+            ax=ax, label="Background", density=True, color="tab:blue", lw=2
+        )
+        metrics["score_muon"].plot(
+            ax=ax, label="Muon", density=True, color="tab:orange", lw=2
+        )
         ax.set_xlabel("Score")
         ax.set_ylabel("Density")
         ax.legend()

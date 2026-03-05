@@ -153,7 +153,6 @@ class TrackerTrackSelectionDataset(Dataset):
         each track are precomputed and stored.
         """
 
-
         with h5.File(path, "r") as file:
             total = len(file[next(iter(file.keys()))])  # type: ignore
             stop = cls._get_stop(max_events=max_events, total=total)
@@ -256,7 +255,9 @@ class TrackerTrackSelectionDataset(Dataset):
             tensors = [example[key] for example in example_list]
             padded = pad_sequence(tensors, batch_first=True, padding_value=0)
             batch_dict[key] = padded
-            if key != "target": # we can use tracker_track_data_mask for target (tracker_track_target)
+            if (
+                key != "target"
+            ):  # we can use tracker_track_data_mask for target (tracker_track_target)
                 lengths = torch.tensor([t.shape[0] for t in tensors])
                 max_len = padded.shape[1]
                 mask = torch.arange(max_len).unsqueeze(0) < lengths.unsqueeze(1)

@@ -8,6 +8,7 @@ __all__ = [
     "CUDAMemorySummary",
 ]
 
+
 class CUDAMemorySummary(Callback):
     """ """
 

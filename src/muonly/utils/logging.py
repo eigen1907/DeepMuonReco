@@ -18,7 +18,6 @@ def elapsed_timer():
     yield lambda: time.perf_counter() - start
 
 
-
 def log_everything(logger: AimLogger, config: DictConfig, model, output_dir: Path):
     logger.experiment.name = config.run.name
 

@@ -5,8 +5,8 @@ import einops as eo
 
 
 __all__ = [
-    'CrossAttention',
-    'SelfAttention',
+    "CrossAttention",
+    "SelfAttention",
 ]
 
 

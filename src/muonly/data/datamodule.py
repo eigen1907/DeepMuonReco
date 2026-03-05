@@ -90,7 +90,9 @@ class DataModule(LightningDataModule):
                 max_events=self.hparams[f"{prefix}_max_events"],
                 **kwargs,
             )
-        _logger.info(f"Loaded {prefix} set with {len(dataset)} examples in {elapsed_time():.2f} seconds")
+        _logger.info(
+            f"Loaded {prefix} set with {len(dataset)} examples in {elapsed_time():.2f} seconds"
+        )
 
         _logger.info(f"Preprocessing {prefix} set")
         preprocessing = self.hparams["preprocessing"]

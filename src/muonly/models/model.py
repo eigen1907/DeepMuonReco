@@ -95,7 +95,7 @@ class Model(LightningModule, abc.ABC):
         log_dict = {}
         self._log(key=prefix, value=outout, log_dict=log_dict)
 
-        plt.close("all") # close all figures to prevent memory leak in AimLogger
+        plt.close("all")  # close all figures to prevent memory leak in AimLogger
 
         self.log_dict(log_dict)
         metrics.reset()
