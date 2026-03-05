@@ -94,7 +94,7 @@ class DataModule(LightningDataModule):
 
         _logger.info(f"Preprocessing {prefix} set")
         preprocessing = self.hparams["preprocessing"]
-        dataset.preprocess(preprocessing)
+        dataset.apply(preprocessing)
         _logger.info(f"Preprocessed {prefix} set in {elapsed_time():.2f} seconds")
 
         return dataset

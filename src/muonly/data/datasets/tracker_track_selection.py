@@ -36,6 +36,13 @@ class Compose:
         return format_string
 
 
+def _stack_features(feature_list: list[np.ndarray]) -> list[torch.Tensor]:
+    return [
+        torch.from_numpy(np.stack(each, axis=1, dtype=np.float32))
+        for each in zip(*feature_list)
+    ]
+
+
 class TrackerTrackSelectionDataset(Dataset):
     def __init__(
         self,
@@ -58,17 +65,20 @@ class TrackerTrackSelectionDataset(Dataset):
         _logger.info(f"  - GEM segment features: {gem_segment_feature_list}")
         _logger.info(f"  - RPC hit features: {rpc_hit_feature_list}")
         _logger.info(f"  - GEM hit features: {gem_hit_feature_list}")
-        _logger.info(f"  - Target key: {target_key}")
+        _logger.info(f"  - Target: {target_key}")
 
         path = Path(path)
 
+        _logger.info(f"{path.suffix} file format detected.")
         if path.suffix == ".root":
             loader = self.from_root
         elif path.suffix in [".h5", ".hdf5"]:
             loader = self.from_hdf5
         else:
             raise ValueError(f"Unsupported file format: {path.suffix}")
+        _logger.info(f"Using {loader.__name__} to load the data.")
 
+        _logger.info(f"Loading examples from {path} ...")
         self.example_list = loader(
             path=path,
             tracker_track_feature_list=tracker_track_feature_list,
@@ -80,6 +90,7 @@ class TrackerTrackSelectionDataset(Dataset):
             target_key=target_key,
             max_events=max_events,
         )
+        _logger.info(f"Loaded {len(self.example_list)} examples from {path}.")
 
     def __getitem__(self, index: int) -> TensorDict:
         return self.example_list[index]
@@ -142,11 +153,6 @@ class TrackerTrackSelectionDataset(Dataset):
         each track are precomputed and stored.
         """
 
-        def stack_features(feature_list: list[np.ndarray]) -> list[torch.Tensor]:
-            return [
-                torch.from_numpy(np.stack(each, axis=1, dtype=np.float32))
-                for each in zip(*feature_list)
-            ]
 
         with h5.File(path, "r") as file:
             total = len(file[next(iter(file.keys()))])  # type: ignore
@@ -204,42 +210,41 @@ class TrackerTrackSelectionDataset(Dataset):
             key_list_for_stack.append("gem_hit")
 
         for key in key_list_for_stack:
-            chunk[key] = stack_features(chunk[key])
+            chunk[key] = _stack_features(chunk[key])
 
         return [
             TensorDict(dict(zip(chunk.keys(), each))) for each in zip(*chunk.values())
         ]
 
-    def preprocess(self, preprocessing: dict) -> Self:
-        """Apply preprocessing transforms to all examples in-place.
+    def apply(self, transforms: dict) -> Self:
+        """Apply transforms transforms to all examples in-place.
 
         Args:
-            preprocessing (dict): A dictionary where keys are object name (e.g., 'tracker_track', 'dt_segment', etc.) and values are lists of transforms to apply to that object.
+            transforms (dict): A dictionary where keys are object name (e.g., 'tracker_track', 'dt_segment', etc.) and values are lists of transforms to apply to that object.
         """
-        preprocessing = {key: Compose(value) for key, value in preprocessing.items()}
+        transforms = {key: Compose(value) for key, value in transforms.items()}
 
         # drop if the key is not found in the examples, and log a warning
         unavailable_keys = [
             key
-            for key in preprocessing.keys()
+            for key in transforms.keys()
             if key not in self.example_list[0].sorted_keys
         ]
         if len(unavailable_keys) > 0:
-            _logger.warning(
-                f"The following keys in the preprocessing dictionary are not found in the examples and will be ignored: {unavailable_keys}"
-            )
             for key in unavailable_keys:
-                del preprocessing[key]
+                _logger.warning(
+                    f"Key '{key}' not found in the examples. The corresponding transforms will be ignored."
+                )
+                del transforms[key]
 
-
-        for key, value in preprocessing.items():
+        for key, value in transforms.items():
             _logger.info(f"Applying the following transforms to {key}: {value}")
 
-        _logger.info("Preprocessing examples ...")
+        _logger.info(f"Applying transforms to {len(self.example_list)} examples ...")
         for example in tqdm.rich.tqdm(self.example_list):
-            for key, transforms in preprocessing.items():
-                example[key] = transforms(example[key])
-        _logger.info("Preprocessing completed.")
+            for key, value in transforms.items():
+                example[key] = value(example[key])
+        _logger.info(f"Applied transforms to {len(self.example_list)} examples.")
 
         return self
 
