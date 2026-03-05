@@ -5,8 +5,8 @@ import h5py as h5
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+from torch.nn.utils.rnn import pad_sequence
 from tensordict import TensorDict
-from tensordict import pad_sequence
 import tqdm.rich
 
 
@@ -250,16 +250,15 @@ class TrackerTrackSelectionDataset(Dataset):
 
     @classmethod
     def collate(cls, example_list: list[TensorDict]) -> TensorDict:
-        # FIXME: tensordict.pad_sequence is probably slower than using torch.nn.utils.rnn.pad_sequence manually
-        batch = pad_sequence(example_list, return_mask=True)
-        # FIXME:
-        batch["tracker_track_data_mask"] = batch["masks"]["tracker_track"]
-        batch["dt_segment_data_mask"] = batch["masks"]["dt_segment"]
-        batch["csc_segment_data_mask"] = batch["masks"]["csc_segment"]
-        if "gem_segment" in batch["masks"]:
-            batch["gem_segment_data_mask"] = batch["masks"]["gem_segment"]
-        if "rpc_hit" in batch["masks"]:
-            batch["rpc_hit_data_mask"] = batch["masks"]["rpc_hit"]
-        if "gem_hit" in batch["masks"]:
-            batch["gem_hit_data_mask"] = batch["masks"]["gem_hit"]
-        return batch
+        keys = example_list[0].sorted_keys
+        batch_dict = {}
+        for key in keys:
+            tensors = [example[key] for example in example_list]
+            padded = pad_sequence(tensors, batch_first=True, padding_value=0)
+            batch_dict[key] = padded
+            if key != "target": # we can use tracker_track_data_mask for target (tracker_track_target)
+                lengths = torch.tensor([t.shape[0] for t in tensors])
+                max_len = padded.shape[1]
+                mask = torch.arange(max_len).unsqueeze(0) < lengths.unsqueeze(1)
+                batch_dict[f"{key}_data_mask"] = mask
+        return TensorDict(batch_dict)
