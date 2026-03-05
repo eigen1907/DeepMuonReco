@@ -8,7 +8,7 @@ devices: 1
 precision: null
 
 min_epochs: 1
-max_epochs: 100000
+max_epochs: 50
 
 max_time: 00:40:00:00 # DD:HH:MM:SS
 
