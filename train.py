@@ -37,8 +37,8 @@ OmegaConf.register_new_resolver(
 )
 
 OmegaConf.register_new_resolver(
-    name="eval",
-    resolver=eval,
+    name="len",
+    resolver=len,
 )
 
 OmegaConf.register_new_resolver(

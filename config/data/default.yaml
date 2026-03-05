@@ -1,5 +1,5 @@
 tracker_track:
-  dim: ${eval:'len(${.features})'}
+  dim: ${len:${.features}}
   features: [px, py, pz, vx, vy, vz, charge]
   preprocessing:
   - _target_: muonly.nn.SignedLog1p
@@ -10,7 +10,7 @@ tracker_track:
     input_max: [13.967169761657715, 12.497471809387207, 14.908775329589844, 5.15223503112793,
       3.4608707427978516, 5.6381025314331055, 1.0]
 dt_segment:
-  dim: ${eval:'len(${.features})'}
+  dim: ${len:${.features}}
   features: [pos_x, pos_y, pos_z, dir_x, dir_y, dir_z]
   preprocessing:
   - _target_: muonly.nn.MinMaxScaling
@@ -18,7 +18,7 @@ dt_segment:
       -0.9571021795272827]
     input_max: [779.1180419921875, 720.4951171875, 652.156005859375, 1.0, 1.0, 0.9580870270729065]
 csc_segment:
-  dim: ${eval:'len(${.features})'}
+  dim: ${len:${.features}}
   features: [pos_x, pos_y, pos_z, dir_x, dir_y, dir_z]
   preprocessing:
   - _target_: muonly.nn.MinMaxScaling
@@ -27,7 +27,7 @@ csc_segment:
     input_max: [685.690185546875, 685.2440795898438, 1037.7431640625, 0.9980281591415405,
       0.9989678859710693, 1.0000001192092896]
 gem_segment:
-  dim: ${eval:'len(${.features})'}
+  dim: ${len:${.features}}
   features: [pos_x, pos_y, pos_z, dir_x, dir_y, dir_z]
   preprocessing:
   - _target_: muonly.nn.MinMaxScaling
@@ -36,14 +36,14 @@ gem_segment:
     input_max: [142.96022033691406, 144.92630004882812, 538.7899780273438, 0.8307159543037415,
       0.8378711342811584, 1.0]
 rpc_hit:
-  dim: ${eval:'len(${.features})'}
+  dim: ${len:${.features}}
   features: [pos_x, pos_y, pos_z]
   preprocessing:
   - _target_: muonly.nn.MinMaxScaling
     input_min: [-754.4769287109375, -704.5499877929688, -1066.155029296875]
     input_max: [754.4769287109375, 704.5499877929688, 1066.155029296875]
 gem_hit:
-  dim: ${eval:'len(${.features})'}
+  dim: ${len:${.features}}
   features: [pos_x, pos_y, pos_z]
   preprocessing:
   - _target_: muonly.nn.MinMaxScaling
