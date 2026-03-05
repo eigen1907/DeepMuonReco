@@ -62,11 +62,7 @@ def run(
     """
     Args:
     """
-
-    if root_dir := os.getenv("PROJECT_ROOT"):
-        root_dir = Path(root_dir).resolve()
-    else:
-        raise EnvironmentError("PROJECT_ROOT environment variable is not set")
+    root_dir = Path(__file__).parent.resolve()
 
     script_file_path = root_dir / "train.py"
     if not script_file_path.exists():
@@ -162,10 +158,7 @@ def run(
 
 
 def main():
-    if root_dir := os.getenv("PROJECT_ROOT"):
-        root_dir = Path(root_dir).resolve()
-    else:
-        raise EnvironmentError("PROJECT_ROOT environment variable is not set")
+    root_dir = Path(__file__).parent.resolve()
 
     config_dir = root_dir / "config"
     if not config_dir.exists():

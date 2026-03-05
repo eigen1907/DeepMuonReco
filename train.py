@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 import warnings
 import secrets
+import os
 from aim.pytorch_lightning import AimLogger
 import hydra
 from hydra.utils import instantiate
@@ -16,6 +17,9 @@ from tqdm import TqdmExperimentalWarning
 from muonly.nn.utils import init_params
 from muonly.utils.logging import log_everything
 
+
+if 'PROJECT_ROOT' not in os.environ:
+    os.environ['PROJECT_ROOT'] = str(Path(__file__).parent.resolve())
 
 _logger = logging.getLogger(__name__)
 
