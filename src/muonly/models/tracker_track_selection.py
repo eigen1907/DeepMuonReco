@@ -125,11 +125,11 @@ class TrackerTrackSelectionModel(Model):
         auc = metrics["auroc"].compute().item()
 
         fig, ax = plt.subplots()
-        ax.plot(tpr, tnr, label=f"AUC={auc:.4f}")
+        ax.plot(tpr, tnr, label=f"AUC={auc:.4f}", lw=2)
         ax.plot([0, 1], [1, 0], label="Random", color="gray", linestyle="--")
         ax.set_xlabel("True Positive Rate")
         ax.set_ylabel("True Negative Rate")
-        ax.legend()
+        ax.legend(loc="lower left")
         fig.tight_layout()
         output["roc_curve"] = Image(fig)
 
