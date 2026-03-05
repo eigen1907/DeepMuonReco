@@ -171,7 +171,7 @@ def main():
         "-cn",
         "--config-name",
         type=str,
-        default="tracker-track-selection",
+        default="tts",
         help="config name",
     )  # TODO: choices
     for sub_config_dir in config_dir.glob("*"):
