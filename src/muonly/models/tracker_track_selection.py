@@ -99,8 +99,9 @@ class TrackerTrackSelectionModel(Model):
 
     def _update_metrics(self, batch: TensorDict, metrics: MetricCollection):
         loss = self.compute_loss(batch)
-        scores = torch.sigmoid(batch["logits"])
-        target = batch["target"].long()
+        mask = batch["tracker_track_data_mask"]
+        scores = torch.sigmoid(batch["logits"][mask])
+        target = batch["target"][mask].long()
 
         metrics["loss"].update(loss)
         metrics["roc"].update(preds=scores, target=target)
