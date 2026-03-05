@@ -125,7 +125,7 @@ def run(
     requirements = "||".join([f'(machine=="{each}.sscc.uos")' for each in node_list])
     print(f"{requirements=}")
 
-    raw_submit: dict[str, Any] = {
+    submit_input = {
         "universe": "vanilla",
         "getenv": "True",
         # job
@@ -147,13 +147,13 @@ def run(
         "priority": 1000,
     }
 
-    submit: dict[str, str] = {key: str(value) for key, value in raw_submit.items()}
+    submit_input = {key: str(value) for key, value in submit_input.items()}
 
-    submit = Submit(submit)
+    submit = Submit(submit_input)
     schedd = Schedd()
-    schedd.submit(submit)
+    submit_result = schedd.submit(submit)
 
-    print(f"🚀🚀🚀 submit {job_batch_name}")
+    print(f"🚀🚀🚀 submit {job_batch_name} with cluster id {submit_result.cluster()}")
 
 
 def main():
