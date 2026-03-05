@@ -256,6 +256,7 @@ class TransformerDecoderLayer(nn.Module):
         widening_factor: int,
         dropout: float = 0,
         self_attn: bool = True,
+        cross_attn_residual: bool = True,
     ) -> None:
         """ """
         super().__init__()
@@ -272,7 +273,7 @@ class TransformerDecoderLayer(nn.Module):
             embed_dim=model_dim,
             num_heads=num_heads,
             dropout=dropout,
-            use_post_attention_residual=False,
+            use_post_attention_residual=cross_attn_residual,
         )
         self.mlp = MLPBlock(
             embed_dim=model_dim,
@@ -318,6 +319,7 @@ class TransformerDecoder(nn.Module):
         widening_factor: int = 1,
         dropout: float = 0,
         self_attn: bool = True,
+        cross_attn_residual: bool = True,
     ) -> None:
         """ """
         super().__init__()
@@ -330,6 +332,7 @@ class TransformerDecoder(nn.Module):
             widening_factor=widening_factor,
             dropout=dropout,
             self_attn=self_attn,
+            cross_attn_residual=cross_attn_residual,
         )
 
         self.layer_list = nn.ModuleList(_get_clones(layer, num_layers))
