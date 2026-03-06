@@ -187,7 +187,7 @@ def main():
         required=False,
         help="a list of yaml config files",
     )
-    parser.add_argument("-m", "--memory", type=str, default="64GB", help="memory")
+    parser.add_argument("-m", "--memory", type=str, default="80GB", help="memory")
     # TODO: when gpus > 1, update config_file
     parser.add_argument("--gpus", type=int, default=1, help="the number of GPUs")
     parser.add_argument("--cpus", type=int, default=3, help="the number of CPUs")
