@@ -45,3 +45,9 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-name = "muonly"
 module-root = "src"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff]
+exclude = ["*.ipynb"]
