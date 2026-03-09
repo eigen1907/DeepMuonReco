@@ -48,6 +48,7 @@ class DataModule(LightningDataModule):
         val_max_events: int | None = None,
         test_max_events: int | None = None,
         predict_max_events: int | None = None,
+        pre_fit_validation: bool = False,
     ) -> None:
         """ """
         super().__init__()
@@ -174,14 +175,25 @@ class DataModule(LightningDataModule):
     def teardown(self, stage: str):
         _logger.info(f"Tearing down {stage=}")
         if stage == "fit":
+            _logger.info("Releasing training set from memory.")
             delattr(self, "train_set")
+            _logger.info("Releasing validation set from memory.")
             delattr(self, "val_set")
         elif stage == "validate":
-            # delattr(self, 'val_set')
-            ...
+            if self.hparams["pre_fit_validation"]:
+                _logger.info(
+                    "Pre-fit validation is enabled, so keeping the validation set in memory for the following fit stage."
+                )
+            else:
+                _logger.info(
+                    "Pre-fit validation is disabled, so releasing the validation set from memory."
+                )
+                delattr(self, 'val_set')
         elif stage == "test":
+            _logger.info("Releasing test set from memory.")
             delattr(self, "test_set")
         elif stage == "predict":
+            _logger.info("Releasing prediction set from memory.")
             delattr(self, "predict_set")
         else:
             raise RuntimeError(f"got an unexpected {stage=}")

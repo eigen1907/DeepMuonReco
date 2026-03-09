@@ -6,8 +6,8 @@ root: ${paths.data_dir}
 
 train_file: train.h5
 val_file: val.h5
-test_file: val.h5
-predict_file: val.h5
+test_file: ${.val_file} # test stage is used for final evaluation of the model on the validation set, so we use the same file as for validation
+predict_file: test.h5
 
 tracker_track_feature_list: ${data.tracker_track.features}
 dt_segment_feature_list: ${data.dt_segment.features}
@@ -37,3 +37,5 @@ train_max_events: null
 val_max_events: null
 test_max_events: null
 predict_max_events: null
+
+pre_fit_validation: ${run.pre_fit_validation}

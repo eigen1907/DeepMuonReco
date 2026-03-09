@@ -1,12 +1,15 @@
 _target_: muonly.nn.VanillaTransformerModel
 
-tracker_track_dim: null
-dt_segment_dim: null
-csc_segment_dim: null
-gem_segment_dim: null
-rpc_hit_dim: null
-gem_hit_dim: null
-output_dim: null
+# Input dimensions for each data type
+tracker_track_dim: ${data.tracker_track.dim}
+dt_segment_dim: ${data.dt_segment.dim}
+csc_segment_dim: ${data.csc_segment.dim}
+gem_segment_dim: ${data.gem_segment.dim}
+rpc_hit_dim: ${data.rpc_hit.dim}
+gem_hit_dim: ${data.gem_hit.dim}
+
+# Output dimension
+output_dim: ${exp.target_dim}
 
 model_dim: 64 # Dimension of the model embeddings
 feedforward_dim: 256 # Dimension of the feed-forward network

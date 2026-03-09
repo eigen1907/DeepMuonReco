@@ -87,7 +87,7 @@ class VanillaTransformerModel(nn.Module):
             dropout=dropout,
             activation=activation,
             batch_first=True,
-            norm_first=False,
+            norm_first=True,
             bias=True,
         )
 
