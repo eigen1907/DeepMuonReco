@@ -13,8 +13,6 @@ __all__ = [
     "PerceiverEncoder",
     "PerceiverProcessor",
     "PerceiverProcessorBlock",
-    "PerceiverBasicDecoder",
-    "PerceiverLatentQueryDecoder",
 ]
 
 
