@@ -6,6 +6,7 @@ from lightning.pytorch import LightningDataModule
 from lightning.pytorch.trainer.states import RunningStage
 from hydra.utils import get_class
 from torch.utils.data import DataLoader
+from .utils import Compose
 from ..utils.logging import elapsed_timer
 
 
@@ -95,10 +96,14 @@ class DataModule(LightningDataModule):
             f"Loaded {prefix} set with {len(dataset)} examples in {elapsed_time():.2f} seconds"
         )
 
-        _logger.info(f"Preprocessing {prefix} set")
-        preprocessing = self.hparams["preprocessing"]
-        dataset.apply(preprocessing)
-        _logger.info(f"Preprocessed {prefix} set in {elapsed_time():.2f} seconds")
+        if preprocessing := self.hparams["preprocessing"]:
+            _logger.info(f"Preprocessing {prefix} set")
+            preprocessing = {key: Compose(value) for key, value in preprocessing.items()}
+            with elapsed_timer() as elapsed_time:
+                dataset.apply(preprocessing)
+            _logger.info(f"Preprocessed {prefix} set in {elapsed_time():.2f} seconds")
+        else:
+            _logger.warning(f"No preprocessing steps specified for {prefix} set")
 
         return dataset
 

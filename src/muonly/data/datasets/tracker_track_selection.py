@@ -8,6 +8,7 @@ from torch.utils.data import Dataset
 from torch.nn.utils.rnn import pad_sequence
 from tensordict import TensorDict
 import tqdm.rich
+from ..utils import Compose
 
 
 __all__ = [
@@ -16,24 +17,6 @@ __all__ = [
 
 
 _logger = getLogger(__name__)
-
-
-class Compose:
-    def __init__(self, transforms):
-        self.transforms = transforms
-
-    def __call__(self, img):
-        for t in self.transforms:
-            img = t(img)
-        return img
-
-    def __repr__(self) -> str:
-        format_string = self.__class__.__name__ + "("
-        for t in self.transforms:
-            format_string += "\n"
-            format_string += f"    {t}"
-        format_string += "\n)"
-        return format_string
 
 
 def _stack_features(feature_list: list[np.ndarray]) -> list[torch.Tensor]:
@@ -215,14 +198,12 @@ class TrackerTrackSelectionDataset(Dataset):
             TensorDict(dict(zip(chunk.keys(), each))) for each in zip(*chunk.values())
         ]
 
-    def apply(self, transforms: dict) -> Self:
+    def apply(self, transforms: dict[str, Compose]) -> Self:
         """Apply transforms transforms to all examples in-place.
 
         Args:
             transforms (dict): A dictionary where keys are object name (e.g., 'tracker_track', 'dt_segment', etc.) and values are lists of transforms to apply to that object.
         """
-        transforms = {key: Compose(value) for key, value in transforms.items()}
-
         # drop if the key is not found in the examples, and log a warning
         unavailable_keys = [
             key
