@@ -60,6 +60,12 @@ def run(
     """
     Args:
     """
+    if gpus < 1:
+        raise ValueError("At least one GPU is required")
+    if cpus < 1:
+        raise ValueError("At least one CPU is required")
+
+
     root_dir = Path(__file__).parent.resolve()
 
     script_file_path = root_dir / "train.py"
