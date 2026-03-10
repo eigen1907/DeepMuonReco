@@ -1,4 +1,0 @@
-_target_: muonly.logger.Logger
-repo: ${paths.log_dir}
-experiment: ${exp.name}
-run: ${run.name}

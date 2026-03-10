@@ -126,7 +126,7 @@ class Model(LightningModule, abc.ABC):
         )
 
     def predict_step(self, batch: TensorDict) -> TensorDict:
-        return self(batch)
+        return self.net(batch)
 
     ############################################################################
     # Aim tracking
