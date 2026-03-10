@@ -119,6 +119,8 @@ class Histogram(Metric):
 
     @cached_property
     def edges(self) -> np.ndarray:
+        if self.variable_bins:
+            return self.bin_edges.numpy()
         return np.linspace(*self.range, num=(self.bins + 1))
 
     @property
