@@ -1,8 +1,0 @@
-modules:
-  - name: score
-    module:
-      _target_: torch.nn.Sigmoid
-    in_keys:
-      - logits
-    out_keys:
-      - score

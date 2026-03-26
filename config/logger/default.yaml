@@ -1,4 +1,0 @@
-_target_: deepmuonreco.logger.Logger
-repo: ${paths.log_dir}
-experiment: ${exp.name}
-run: ${run.name}

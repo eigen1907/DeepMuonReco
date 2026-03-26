@@ -1,0 +1,34 @@
+# @package _global_
+
+defaults:
+  - torch: default
+  - hydra: default
+  - paths: default
+  - run: default
+
+  - data: default
+  - datamodule: default
+
+  - model: tts
+  - net: latent_attention
+
+  - optim: default
+
+  - trainer: gpu_16-mixed
+  - callbacks: default
+  - logger: aim
+
+  - _self_
+
+  - debug: null
+
+exp:
+  name: tracker_track_selection
+  target_dim: 1
+  target_key: track_is_trk_muon
+
+model:
+  pos_weight: 150.0
+
+paths:
+  data_dir: /home/joshin/workspace-gate/DeepMuonReco/DeepMuonReco/data/mu2030pu/

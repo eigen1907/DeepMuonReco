@@ -4,6 +4,6 @@ experiment: ${exp.name}
 context_prefixes:
   subset:
     train: train_
-    validate: validate_
+    validate: val_
     test: test_
     predict: predict_

@@ -1,4 +1,0 @@
-name: tracker-track-selection
-target_dim: 1 # binary classification for each track
-target_key: track_is_trk_muon
-pos_weight: 150.0 # FIXME:
