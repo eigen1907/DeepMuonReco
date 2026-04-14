@@ -1,0 +1,4 @@
+defaults:
+  - default
+
+data_dir: /home/joshin/workspace-gate/DeepMuonReco/DeepMuonReco/data/mu2030pu/

@@ -3,7 +3,7 @@
 defaults:
   - torch: default
   - hydra: default
-  - paths: default
+  - paths: khu
   - run: default
 
   - data: default
@@ -29,6 +29,3 @@ exp:
 
 model:
   pos_weight: 150.0
-
-paths:
-  data_dir: /home/joshin/workspace-gate/DeepMuonReco/DeepMuonReco/data/mu2030pu/
