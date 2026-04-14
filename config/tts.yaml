@@ -14,7 +14,7 @@ defaults:
 
   - optim: default
 
-  - trainer: gpu_16-mixed
+  - trainer: gpu-bf16-mixed
   - callbacks: default
   - logger: aim
 
