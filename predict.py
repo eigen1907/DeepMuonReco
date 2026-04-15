@@ -53,7 +53,6 @@ def run(ckpt_file_path: Path, gpu_id: int, enable_progress_bar: bool = False):
     )
     config = hydra.compose(config_name="config")
 
-    config.trainer.enable_progress_bar = enable_progress_bar
 
     device = torch.device(f"cuda:{gpu_id}")
 
@@ -83,8 +82,8 @@ def run(ckpt_file_path: Path, gpu_id: int, enable_progress_bar: bool = False):
         writer,
     ]
 
-    config.trainer.enable_progress_bar = True
     _logger.info("instantiating trainer...")
+    config.trainer.enable_progress_bar = enable_progress_bar
     trainer = instantiate(config.trainer)(callbacks=callbacks)
 
     _logger.info("starting prediction...")
