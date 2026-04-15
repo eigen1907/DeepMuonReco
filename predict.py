@@ -81,7 +81,7 @@ def main():
         dest="ckpt_file_path",
         type=Path,
         required=True,
-        help="Path to the resolved YAML configuration file",
+        help="Path to the Lightning checkpoint file",
     )
 
     args, unknown_args = parser.parse_known_args()
