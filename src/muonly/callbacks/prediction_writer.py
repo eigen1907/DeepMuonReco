@@ -66,7 +66,7 @@ class PredictionWriter(BasePredictionWriter):
         batch_size = chunk.shape[0]
         new_dataset_size = dataset.shape[0] + batch_size
         dataset.resize(size=new_dataset_size, axis=0)
-        dataset[-batch_size:] = chunk.cpu().numpy()
+        dataset[-batch_size:] = chunk.cpu().float().numpy()
 
     def extend_vlen(self, dataset: Dataset | None, chunk: Tensor, mask: Tensor) -> None:
         """ """
@@ -75,7 +75,7 @@ class PredictionWriter(BasePredictionWriter):
                 "Dataset is not initialized. "
                 "Make sure to call setup() before writing predictions."
             )
-        chunk_np = chunk.cpu().numpy()
+        chunk_np = chunk.cpu().float().numpy()
         mask_np = mask.cpu().bool().numpy()
 
         chunk_np = [c[m] for c, m in zip(chunk_np, mask_np)]
@@ -101,7 +101,7 @@ class PredictionWriter(BasePredictionWriter):
         self.extend_vlen(
             dataset=self.score_dataset,
             chunk=prediction["score"],
-            mask=prediction["masks"]["tracker_track"],
+            mask=prediction["tracker_track_data_mask"],
         )
 
     def on_predict_end(self, trainer, pl_module) -> None:

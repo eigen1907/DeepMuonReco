@@ -150,3 +150,8 @@ class TrackerTrackSelectionModel(Model):
         output["score"] = Image(fig)
 
         return output
+
+    def predict_step(self, batch: TensorDict) -> TensorDict:
+        batch = self.net(batch)
+        batch["score"] = torch.sigmoid(batch["logits"])
+        return batch
