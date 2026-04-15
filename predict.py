@@ -25,7 +25,7 @@ _logger = logging.getLogger(__name__)
 
 def run(ckpt_file_path: Path, args_list: list[str]):
     torch.set_float32_matmul_precision("high")
-    _logger.info(f"Setting torch float32 matmul precision to high")
+    _logger.info("Setting torch float32 matmul precision to high")
 
     ckpt_file_path = ckpt_file_path.resolve()
     _logger.info(f"{ckpt_file_path=}")
@@ -40,7 +40,7 @@ def run(ckpt_file_path: Path, args_list: list[str]):
     base_config = OmegaConf.load(log_dir_path / "config.yaml")
 
     cli_config = OmegaConf.from_cli(args_list)
-    _logger.info(f'{cli_config=}')
+    _logger.info(f"{cli_config=}")
 
     config = OmegaConf.merge(base_config, cli_config)
 
@@ -65,7 +65,9 @@ def run(ckpt_file_path: Path, args_list: list[str]):
     trainer: Trainer = instantiate(config.trainer)(callbacks=callbacks)
 
     _logger.info("starting prediction...")
-    trainer.predict(model=model, datamodule=datamodule, ckpt_path=ckpt_file_path, weights_only=False)
+    trainer.predict(
+        model=model, datamodule=datamodule, ckpt_path=ckpt_file_path, weights_only=False
+    )
     _logger.info("prediction finished.")
 
     _logger.info("done")
@@ -74,19 +76,17 @@ def run(ckpt_file_path: Path, args_list: list[str]):
 def main():
     parser = argparse.ArgumentParser(description="Run app with OmegaConf")
     parser.add_argument(
-        '-c', '--ckpt',
-        dest='ckpt_file_path',
+        "-c",
+        "--ckpt",
+        dest="ckpt_file_path",
         type=Path,
         required=True,
-        help='Path to the resolved YAML configuration file'
+        help="Path to the resolved YAML configuration file",
     )
 
     args, unknown_args = parser.parse_known_args()
 
-    run(
-        ckpt_file_path=args.ckpt_file_path,
-        args_list=unknown_args
-    )
+    run(ckpt_file_path=args.ckpt_file_path, args_list=unknown_args)
 
 
 if __name__ == "__main__":
