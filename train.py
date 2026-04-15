@@ -58,7 +58,7 @@ OmegaConf.register_new_resolver(
 def main(config: DictConfig):
     output_dir = Path(config.paths.run_dir)
     with open(output_dir / "config.yaml", "w") as stream:
-        OmegaConf.save(config=config, f=stream)
+        OmegaConf.save(config=config, f=stream, resolve=True)
 
     if config.torch.num_threads is not None:
         torch.set_num_threads(config.torch.num_threads)
